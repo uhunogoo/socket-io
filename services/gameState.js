@@ -51,7 +51,7 @@ export class GameState {
   startGame(roomId) {
     const room = this.getRoom( roomId );
     if (room) {
-      room.isActive = true;
+      room.status = 'lobby';
       return true;
     }
     return false;

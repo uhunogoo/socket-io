@@ -4,6 +4,7 @@ export class Room {
     this.pin = roomData.pin;
     this.hostId = roomData.hostId;
     this.quizId = roomData.quizId;
+    this.currentRoundIndex = 0;
     this.maxPlayers = roomData.maxPlayers || 50;
     this.status = roomData.status || 'lobby';
     this.currentQuestionId = roomData.currentQuestionId || 0;
@@ -24,12 +25,13 @@ export class Room {
     return this.status === status;
   }
 
-  roomInfo() {
+  toObject() {
     return {
       id: this.id,
       pin: this.pin,
       hostId: this.hostId,
       quizId: this.quizId,
+      currentRoundIndex: this.currentRoundIndex,
       maxPlayers: this.maxPlayers,
       status: this.status,
       currentQuestionId: this.currentQuestionId,

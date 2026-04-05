@@ -5,51 +5,48 @@ export class Questions {
   }
 
   getCurrentQuestion() {
-    if (this.currentIndex >= this.questions.length) {
-      return null;
-    }
-    return this.questions[this.currentIndex];
+    return this.currentIndex < this.questions.length 
+      ? this.questions[this.currentIndex] 
+      : null;
   }
-
+ 
   getNextQuestion() {
+    if (!this.hasNextQuestion()) return null;
     this.currentIndex++;
     return this.getCurrentQuestion();
+  }
+ 
+  setRoundIndex(roundIndex) {
+    // Ensure valid round index
+    if (roundIndex < 0 || roundIndex >= this.questions.length) {
+      console.warn(`[Questions] Invalid roundIndex ${roundIndex}, max: ${this.questions.length - 1}`);
+      this.currentIndex = Math.max(0, Math.min(roundIndex, this.questions.length - 1));
+    } else {
+      this.currentIndex = roundIndex;
+    }
   }
 
   hasNextQuestion() {
     return this.currentIndex < this.questions.length - 1;
   }
-
-  getTotalQuestions() {
-    return this.questions.length;
-  }
-
-  getCurrentIndex() {
-    return this.currentIndex;
-  }
-
-  getQuestionByIndex(index) {
-    if (index < 0 || index >= this.questions.length) {
-      return null;
-    }
-    return this.questions[index];
-  }
-
+ 
   reset() {
     this.currentIndex = 0;
   }
-
+ 
   isComplete() {
     return this.currentIndex >= this.questions.length;
   }
 
-  toObject() {
-    return {
-      questions: this.questions,
-      currentIndex: this.currentIndex,
-      currentQuestion: this.getCurrentQuestion(),
-      totalQuestions: this.getTotalQuestions(),
-      isComplete: this.isComplete()
-    };
+  getAllQuestions() {
+    return [...this.questions];
+  }
+  
+  isActiveRound(roundIndex) {
+    return roundIndex === this.currentIndex;
+  }
+
+  getTotalRounds() {
+    return this.questions.length;
   }
 }
