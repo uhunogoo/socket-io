@@ -2,9 +2,10 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { initializeSocketHandlers } from './sockets/socketManager.js';
-import { GameState } from './services/gameState.js';
+// import { GameState } from './services/GameState.js';
 import { Database } from './config/database.js';
 import cors from 'cors';
+import { GameRoomRegistry } from './services/GameRoomRegistry.js';
 
 const app = express();
 app.use(cors());
@@ -18,13 +19,11 @@ const io = new Server(server, {
 });
 
 // Initialize services
-const gameState = new GameState();
+const gameRoomRegistry = new GameRoomRegistry();
 const db = new Database();
 
-await gameState.init( db );
-
 // Initialize socket handlers
-initializeSocketHandlers(io, gameState, db);
+initializeSocketHandlers(io, gameRoomRegistry, db);
 
 server.listen(process.env.PORT || 3001, () => {
   console.log(`🚀 Server running on port ${process.env.PORT || 3001}`);

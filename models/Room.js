@@ -11,31 +11,7 @@ export class Room {
     this.timeToAnswer = roomData.timeToAnswer || 30;
   }
 
-  updateStatus(newStatus) {
-    this.status = newStatus;
-    return this;
-  }
-
-  nextQuestion() {
-    this.currentQuestionId++;
-    return this;
-  }
-  
-  checkRoomStatus( status ) {
-    return this.status === status;
-  }
-
-  toObject() {
-    return {
-      id: this.id,
-      pin: this.pin,
-      hostId: this.hostId,
-      quizId: this.quizId,
-      currentRoundIndex: this.currentRoundIndex,
-      maxPlayers: this.maxPlayers,
-      status: this.status,
-      currentQuestionId: this.currentQuestionId,
-      timeToAnswer: this.timeToAnswer,
-    };
+  setStatus( status ) {
+    this.status = status;
   }
 }

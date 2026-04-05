@@ -1,6 +1,4 @@
-import { Questions } from '../../models/Questions.js';
-
-export const handleHostConnect = (io, socket, gameState, db) => {
+export const handleHostConnect = (io, socket, gameRoomRegistry, db) => {
   return async ({ roomId, playerToken, questions }) => {
     try {
       const room = await db.getRoom(roomId, playerToken);
@@ -9,22 +7,19 @@ export const handleHostConnect = (io, socket, gameState, db) => {
       }
 
       const roomData = room.rows[0];
-      const gameRoom = gameState.createRoom( roomData, { force: false } );
+      const gameRoom = gameRoomRegistry.createGame( roomId, roomData, questions );
+      // const gameRoom = gameState.createRoom( roomData, { force: false } );
       
-      if (!gameRoom.questions) {
-        gameRoom.questions = new Questions( questions );
-      }
 
-      console.log('Host connected', gameRoom.questions.toObject() );
+      // console.log('Host connected', gameRoom.questions.toObject() );
 
       socket.join( roomId );
       socket.roomId = roomId;
 
-      const playerService = gameState.getPlayerService( roomId );
-      const players = Array.from( playerService.players.values() ).map(player => player.toObject());
-
+      // const playerService = gameState.getPlayerService( roomId );
+      const players = gameRoom.getAllPlayers();
       // Send updated players list to host
-      socket.emit('players-update', { players });
+      // socket.emit('players-update', { players });
     } catch (error) {
       socket.emit('error', { message: 'Failed to connect host' });
     }

@@ -5,48 +5,23 @@ export class Questions {
   }
 
   getCurrentQuestion() {
-    return this.currentIndex < this.questions.length 
-      ? this.questions[this.currentIndex] 
-      : null;
+    return this.questions[this.currentIndex] || null;
   }
- 
+
   getNextQuestion() {
-    if (!this.hasNextQuestion()) return null;
     this.currentIndex++;
     return this.getCurrentQuestion();
   }
- 
-  setRoundIndex(roundIndex) {
-    // Ensure valid round index
-    if (roundIndex < 0 || roundIndex >= this.questions.length) {
-      console.warn(`[Questions] Invalid roundIndex ${roundIndex}, max: ${this.questions.length - 1}`);
-      this.currentIndex = Math.max(0, Math.min(roundIndex, this.questions.length - 1));
-    } else {
-      this.currentIndex = roundIndex;
-    }
+
+  hasMoreQuestions() {
+    return this.currentIndex < this.questions.length;
   }
 
-  hasNextQuestion() {
-    return this.currentIndex < this.questions.length - 1;
-  }
- 
-  reset() {
-    this.currentIndex = 0;
-  }
- 
-  isComplete() {
-    return this.currentIndex >= this.questions.length;
-  }
-
-  getAllQuestions() {
-    return [...this.questions];
+  getTotalQuestions() {
+    return this.questions.length;
   }
   
-  isActiveRound(roundIndex) {
-    return roundIndex === this.currentIndex;
-  }
-
-  getTotalRounds() {
-    return this.questions.length;
+  reset() {
+    this.currentIndex = 0;
   }
 }
