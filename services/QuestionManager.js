@@ -4,10 +4,26 @@ export class QuestionManager {
     this.questions = [];
   }
 
+  mapQuestion( question ) {
+    if (!question) return null;
+
+    const newQuestion = {
+      key: question._key,
+      type: question._type,
+      correctAnswerIndex: question.correctAnswerIndex,
+    }
+
+    return newQuestion;
+  }
+
   addQuestions( questions ) {
     const isArray = Array.isArray( questions );
     const questionsArray = isArray ? questions : [ questions ];
-    this.questions.push( ...questionsArray );
+    const mappedQuestions = questionsArray.map( 
+      question => this.mapQuestion( question ) 
+    );
+    
+    this.questions.push( ...mappedQuestions );
   }
 
   getQuestion( index ) {
