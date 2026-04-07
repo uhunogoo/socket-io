@@ -19,8 +19,8 @@ const io = new Server(server, {
 });
 
 // Initialize services
-const gameRoomRegistry = new GameRoomRegistry();
 const db = new Database();
+const gameRoomRegistry = new GameRoomRegistry( db );
 
 // Initialize socket handlers
 initializeSocketHandlers(io, gameRoomRegistry, db);

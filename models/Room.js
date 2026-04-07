@@ -14,4 +14,12 @@ export class Room {
   setStatus( status ) {
     this.status = status;
   }
+
+  getStatus() {
+    return this.status;
+  }
+
+  getRoundDuration() {
+    return this.timeToAnswer;
+  }
 }

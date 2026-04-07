@@ -6,20 +6,21 @@ export class PlayerService {
   }
 
   addPlayer( playerData ) {
-    const { id } = playerData;
-    if ( this.players.has( id ) ) {
-      throw new Error(`Player "${id}" already exists in this service.`);
+    const { playerToken } = playerData;
+    if ( this.players.has( playerToken ) ) {
+      throw new Error(`Player "${playerToken}" already exists in this service.`);
     }
 
     const newPlayer = new Player( playerData );
-    this.players.set( id, newPlayer );
+    this.players.set( newPlayer.playerToken, newPlayer );
     return newPlayer;
   }
 
   updatePlayer( playerId, updatePlayerData ) {
     const existingPlayer = this.players.get( playerId );
     if (!existingPlayer) {
-      throw new Error(`Player "${ playerId }" not found.`);
+      console.warn(`Player "${ playerId }" not found.`);
+      return false;
     }
 
     const updatedPlayer = new Player({ ...existingPlayer, ...updatePlayerData });
@@ -28,12 +29,16 @@ export class PlayerService {
     return updatedPlayer;
   }
   
-  getPlayer( playerId ) {
-    return this.players.get( playerId );
+  getPlayer( playerToken ) {
+    return this.players.get( playerToken );
   }
   
-  removePlayer( playerId ) {
-    this.players.delete( playerId );
+  removePlayer( playerToken ) {
+    const player = this.players.get( playerToken );
+    if (!player) return false;
+
+    this.players.delete( playerToken );
+    return true;
   }
   
   getAllPlayers() {

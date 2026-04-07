@@ -6,24 +6,32 @@ export class GameRoomRegistry {
     this.games = new Map();
   }
   
-  createGame( roomToken, roomData, questions ) {
-     if ( this.games.has( roomToken ) ) {
-      throw new Error(`Game "${ roomToken }" already exists`);
+  createGame( roomId, roomData, questions, { force = false } = {} ) {
+    const existingGame = this.games.get( roomId );
+
+    if ( existingGame && !force ) {
+      if ( roomData.maxPlayers !== existingGame.room.maxPlayers ) {
+        existingGame.room.maxPlayers = roomData.maxPlayers;
+      }
+
+      return existingGame;
     }
     
     const game = new GameInstance( this.db, roomData );
     game.initGame( questions );
-    this.games.set( roomToken, game );
+    this.games.set( roomId, game );
     
     return game;
   }
   
-  getGame(roomToken) {
-    return this.games.get(roomToken);
+  getGame( roomId ) {
+    return this.games.get( roomId );
   }
   
-  removeGame(roomToken) {
-    this.games.delete(roomToken);
+  removeGame( roomId ) {
+    const game = this.games.get( roomId );
+    if ( game ) game.cleanup();
+    this.games.delete( roomId );
   }
   
   getAllGames() {

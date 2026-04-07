@@ -1,55 +1,55 @@
-export const handleJoinRoom = ( io, socket, gameState, db ) => {
+export const handleJoinRoom = ( io, socket, gameRoomRegistry, db ) => {
   return async ({ roomId, playerToken }) => {
     try {
-      const room = gameState.getRoom( roomId );
+      const game = gameRoomRegistry.getGame( roomId );
       
-      if (!room) {
-        socket.leave(roomId);
-        return socket.emit('error', { message: 'Room not found' });
-      }
-
       socket.join( roomId );
       socket.roomId = roomId;
       socket.playerToken = playerToken;
-      
-      const roomSize = io.sockets.adapter.rooms.get(roomId)?.size ?? 0;
-      
-      if (roomSize >= room.maxPlayers) {
-        return socket.emit('error', { message: 'Кімната переповнена', code: 403 });
+
+      if (!game) {
+        socket.leave( roomId );
+        return socket.emit('error', { message: 'Room not found' });
       }
-      
+
       // Get player from database
       const playerData = await db.getDbPlayerByToken( playerToken );
-      if (!playerData) {
+      if (!playerData || playerData.roomId !== roomId ) {
         return socket.emit('error', { message: 'Player not found' });
       };
 
       // Add to PlayerService
-      const playerService = gameState.getPlayerService( roomId );
-      let player = playerService.players.get(playerToken);
+      const playerService = game.playerService;
+      const player = playerService.getPlayer( playerToken );
 
-      if ( player ) {
-        // Reconnect: refresh status, keep scores/streaks
-        player.isConnected = 1;
-        player.lastSeenAt = Date.now();
-        console.log(`🔄 Player ${playerToken} reconnected`);
-      } else {
-        // New join: create fresh player
-        player = playerService.createPlayer({
-          ...playerData,
-          playerToken,
-          isConnected: 1,
-          lastSeenAt: Date.now()
-        });
-
+      try {
+        if ( player ) {
+          playerService.updatePlayer( playerToken, {
+            isConnected: 1,
+            lastSeenAt: Date.now()
+          });
+  
+          console.log(`🔄 Player ${ playerToken } reconnected`);
+        } else {
+          playerService.addPlayer({
+            ...playerData,
+            playerToken,
+            isConnected: 1,
+            lastSeenAt: Date.now()
+          });
+        }
+        
         // Update player online status in database
         await db.updateDbPlayerOnline( playerToken, 1 );
+      } catch (error) {
+        console.error('Error updating player:', error);
       }
       
-      // Get updated players list
-      const allPlayers = Array.from( playerService.players.values() ).map(player => player.toObject());
+      // Emit updated player list to all clients in the room
+      const players = playerService.getAllPlayers();
 
-      io.to( roomId ).emit('players-update', { players: allPlayers } );
+      io.to( roomId ).emit('players-update', { players } );
+      
     } catch (error) {
       console.error('Error joining room:', error );
       socket.leave( roomId );

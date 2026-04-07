@@ -7,19 +7,32 @@ export const handleHostConnect = (io, socket, gameRoomRegistry, db) => {
       }
 
       const roomData = room.rows[0];
-      const gameRoom = gameRoomRegistry.createGame( roomId, roomData, questions );
-      // const gameRoom = gameState.createRoom( roomData, { force: false } );
-      
-
-      // console.log('Host connected', gameRoom.questions.toObject() );
+      const gameRoom = gameRoomRegistry.createGame( 
+        roomId, 
+        roomData, 
+        questions, 
+        { force: false } 
+      );
 
       socket.join( roomId );
+      socket.isHost = true;
       socket.roomId = roomId;
+      gameRoom.hostConnected = true;
 
-      // const playerService = gameState.getPlayerService( roomId );
-      const players = gameRoom.getAllPlayers();
+      const playerService = gameRoom.playerService;
+      let players = playerService.getAllPlayers();
+
+      // Handle server restart - load players from database if not in memory
+      if (players.length === 0) {
+        const dbPlayers = await db.getDbPlayersByRoom(roomId);
+        for (const p of dbPlayers) {
+          playerService.addPlayer({ ...p, isConnected: 0 });
+        }
+        players = playerService.getAllPlayers();
+      }
+      
       // Send updated players list to host
-      // socket.emit('players-update', { players });
+      socket.emit('players-update', { players });
     } catch (error) {
       socket.emit('error', { message: 'Failed to connect host' });
     }

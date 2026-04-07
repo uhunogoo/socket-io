@@ -1,8 +1,8 @@
 import { Room } from '../models/Room.js';
-import { PlayerService } from './playerService.js';
-import { QuestionManager } from './QuestionManager';
+import { PlayerService } from './PlayerService.js';
+import { QuestionManager } from './QuestionManager.js';
 import { RoundManager } from './RoundManager.js';
-import { ScoreManager } from './ScoreManager.js';
+import { AnswerManager } from './AnswerManager.js';
 
 export class GameInstance {
   constructor( db, roomData ) {
@@ -10,20 +10,20 @@ export class GameInstance {
     this.room = new Room( roomData);
 
     // Core game state
+    this.status = this.room.getStatus() || 'lobby';
+
+    // Game management
     this.currentRound = 0;
-    
+
+    // Game state
+    this.hostConnected = false;
+    this.initialized = false;
+
     // Game services
     this.playerService = new PlayerService();
     this.questionManager = new QuestionManager( this );
     this.roundManager = new RoundManager( this );
-    this.scoreManager = new ScoreManager( this );
-    
-    // Game management
-    this.timers = new Map();
-    this.answers = new Map();
-
-    // Game state
-    this.initialized = false;
+    this.answerManager = new AnswerManager( this );
   }
 
   initGame( questions ) {
@@ -38,40 +38,50 @@ export class GameInstance {
   // Core Game Actions (high-level, game-logic oriented)
   startRound() {
     this.roundManager.startRound();
+    const now = Date.now();
+
+    return {
+      round: this.currentRound,
+      status: 'playing',
+      question: this.questionManager.getCurrentQuestion(),
+      roundDuration: this.room.getRoundDuration(),
+      roundStartedAt: now,
+    }
   }
-  endGame() {}
+
+  endRound() {
+    this.roundManager.endRound();
+  }
 
   // Player Management (delegated, but only what’s *directly* needed for game flow)
   addPlayer( playerData ) {
     return this.playerService.addPlayer( playerData );
   }
 
-  removePlayer( playerId ) {
-    this.playerService.removePlayer( playerId );
+  removePlayer( playerToken ) {
+    this.playerService.removePlayer( playerToken );
   }
 
-  getPlayer( playerId ) {
-    return this.playerService.getPlayer( playerId );
+  getPlayer( playerToken ) {
+    return this.playerService.getPlayer( playerToken );
   }
 
   // Round Management
-  submitAnswer(playerId, answerData) {
-    this.questionManager.submitAnswer( playerId, answerData );
+  submitAnswer(playerToken, answerData) {
+    this.roundManager.submitAnswer( playerToken, answerData );
   }
 
   getCurrentRound() {
-    return this.currentRound;
-  }
-
-  nextRound() {
-    this.currentRound++;
+    return this.roundManager.currentRound;
   }
 
   cleanup() {
-    for ( const timer of this.timers.values() ) {
-      clearTimeout( timer.ref );
+    // Clear active timer
+    if ( this.timer ) {
+      clearTimeout( this.timer );
+      this.timer = null;
     }
-    this.timers.clear();
+
     this.answers.clear();
     this.room.setStatus( 'finished' );
   }
