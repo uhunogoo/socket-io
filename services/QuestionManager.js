@@ -24,6 +24,15 @@ export class QuestionManager {
     return this.getQuestion( nextIndex );
   }
 
+  getQuestionForPlayer() {
+    const question = this.getCurrentQuestion();
+    return {
+      id: question.id,
+      title: question.title,
+      options: question.options,
+    };
+  }
+
   hasMoreQuestions() {
     const currentRound = this.gameInstance.getCurrentRound();
     return currentRound < this.questions.length;

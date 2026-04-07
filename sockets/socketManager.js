@@ -12,9 +12,11 @@ export const initializeSocketHandlers = (io, gameRoomRegistry, db) => {
     socket.on('host-connect', handleHostConnect( io, socket, gameRoomRegistry, db ));
     socket.on('join-room', handleJoinRoom( io, socket, gameRoomRegistry, db ));
 
+    // Game actions
     socket.on('start-round', handleStartRound(io, socket, gameRoomRegistry, db));
-    // socket.on('submit-answer', handleSubmitAnswer(io, socket, gameState, gameService, db));
+    socket.on('submit-answer', handleSubmitAnswer(io, socket, gameRoomRegistry, db));
 
+    // Handle disconnect
     socket.on('disconnect', handleDisconnect( io, socket, gameRoomRegistry, db));
   });
 };

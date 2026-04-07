@@ -3,12 +3,7 @@ export const handleJoinRoom = ( io, socket, gameRoomRegistry, db ) => {
     try {
       const game = gameRoomRegistry.getGame( roomId );
       
-      socket.join( roomId );
-      socket.roomId = roomId;
-      socket.playerToken = playerToken;
-
       if (!game) {
-        socket.leave( roomId );
         return socket.emit('error', { message: 'Room not found' });
       }
 
@@ -17,6 +12,10 @@ export const handleJoinRoom = ( io, socket, gameRoomRegistry, db ) => {
       if (!playerData || playerData.roomId !== roomId ) {
         return socket.emit('error', { message: 'Player not found' });
       };
+      
+      socket.join( roomId );
+      socket.roomId = roomId;
+      socket.playerToken = playerToken;
 
       // Add to PlayerService
       const playerService = game.playerService;
@@ -47,9 +46,14 @@ export const handleJoinRoom = ( io, socket, gameRoomRegistry, db ) => {
       
       // Emit updated player list to all clients in the room
       const players = playerService.getAllPlayers();
-
       io.to( roomId ).emit('players-update', { players } );
       
+      // If re-connect during active round, send current round data
+      if ( game.status === 'playing' ) {
+        const roundData = game.startRound( true );
+        socket.emit( 'round-started', roundData );
+      }
+
     } catch (error) {
       console.error('Error joining room:', error );
       socket.leave( roomId );

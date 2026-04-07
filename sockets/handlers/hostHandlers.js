@@ -7,11 +7,18 @@ export const handleHostConnect = (io, socket, gameRoomRegistry, db) => {
       }
 
       const roomData = room.rows[0];
+      const existingGame = gameRoomRegistry.getGame(roomId);
+      
+      // Prevent duplicate host connection
+      if (existingGame && existingGame.hostConnected) {
+        return socket.emit('error', { message: 'Host already connected' });
+      }
+
       const gameRoom = gameRoomRegistry.createGame( 
         roomId, 
         roomData, 
         questions, 
-        { force: false } 
+        { force: existingGame ? true : false } 
       );
 
       socket.join( roomId );
@@ -33,6 +40,7 @@ export const handleHostConnect = (io, socket, gameRoomRegistry, db) => {
       
       // Send updated players list to host
       socket.emit('players-update', { players });
+      // io.to(roomId).emit('host-connected', { roomId }); // I currently don't have any client logic that depends on this, but we can add it back if needed for future features
     } catch (error) {
       socket.emit('error', { message: 'Failed to connect host' });
     }

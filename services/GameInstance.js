@@ -36,20 +36,23 @@ export class GameInstance {
   }
 
   // Core Game Actions (high-level, game-logic oriented)
-  startRound() {
-    this.roundManager.startRound();
-    const now = Date.now();
+  startRound( isRecovered = false ) {
+    if ( !isRecovered ) {
+      this.roundManager.startRound();
+      this.status = 'playing';
+    }
 
     return {
       round: this.currentRound,
-      status: 'playing',
-      question: this.questionManager.getCurrentQuestion(),
+      status: this.status,
+      question: this.questionManager.getQuestionForPlayer(),
       roundDuration: this.room.getRoundDuration(),
-      roundStartedAt: now,
+      roundStartedAt: this.roundManager.startedAt,
     }
   }
 
   endRound() {
+    this.status = 'between_rounds';
     this.roundManager.endRound();
   }
 

@@ -36,6 +36,10 @@ export class Database {
     return await getPlayerByToken( this.db, playerToken );
   }
 
+  async getDbPlayersByRoom(roomId) {
+    return await getDbPlayersByRoom(this.db, roomId);
+  }
+
   async updateDbPlayerOnline( playerToken, isOnline ) {
     try {
       await updatePlayerOnline( this.db, playerToken, isOnline );

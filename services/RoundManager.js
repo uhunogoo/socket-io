@@ -12,13 +12,10 @@ export class RoundManager {
     }
     
     this.isRoundActive = true;
+    this.startedAt = Date.now();
     this.answers.clear();
 
-    return {
-      round: this.gameInstance.getCurrentRound(),
-      status: 'playing',
-      question: this.gameInstance.questionManager.getCurrentQuestion(),
-    };
+    return true;
   }
 
   endRound() {
