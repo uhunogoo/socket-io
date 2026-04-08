@@ -75,7 +75,7 @@ export class GameInstance {
   }
 
   getCurrentRound() {
-    return this.roundManager.currentRound;
+    return this.currentRound;
   }
 
   cleanup() {

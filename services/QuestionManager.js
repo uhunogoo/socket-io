@@ -42,10 +42,12 @@ export class QuestionManager {
 
   getQuestionForPlayer() {
     const question = this.getCurrentQuestion();
+    if (!question) return {};
+
     return {
-      id: question.id,
-      title: question.title,
-      options: question.options,
+      id: question.key,
+      type: question.type,
+      correctAnswerIndex: question.correctAnswerIndex,
     };
   }
 
@@ -58,3 +60,4 @@ export class QuestionManager {
     return this.questions.length;
   }
 }
+
