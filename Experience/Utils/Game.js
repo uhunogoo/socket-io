@@ -1,3 +1,6 @@
+import PlayersManager from './PlayersManager.js';
+import QuestionManager from './QuestionManager.js';
+
 export default class Game {
   constructor() {
     // Game state
@@ -6,9 +9,9 @@ export default class Game {
     
     // Game data
     this.room = null;
-    this.players = new Array();
-    this.questions = new Array();
-    this.rounds = new Array();
-    this.answers = new Array();
+    this.players = new PlayersManager();
+    this.questions = new QuestionManager();
+    this.rounds = [];
+    this.answers = new Map();
   }
 }

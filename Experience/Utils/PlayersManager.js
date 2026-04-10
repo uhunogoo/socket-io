@@ -13,21 +13,25 @@ export default class PlayersManager {
     return player;
   }
 
-  get( playerId ) {
-    return this.players.get( playerId );
+  get( playerToken ) {
+    return this.players.get( playerToken );
   }
 
-  update( playerId, updateData ) {
-    const player = this.players.get( playerId );
+  getAll() {
+    return Array.from( this.players.values() );
+  }
+
+  update( playerToken, updateData ) {
+    const player = this.players.get( playerToken );
     if (!player) return false;
     
     const updatedPlayer = { ...player, ...updateData };
-    this.players.set(playerId, updatedPlayer);
+    this.players.set(playerToken, updatedPlayer);
     
     return updatedPlayer;
   }
 
-  destroy( playerId ) {
-    this.players.delete( playerId );
+  destroy( playerToken ) {
+    this.players.delete( playerToken );
   }
 }

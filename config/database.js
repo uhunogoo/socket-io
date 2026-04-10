@@ -1,55 +1,115 @@
 import 'dotenv/config';
 import { createClient } from '@libsql/client';
-import { getAllActiveRooms, getPlayerByToken, getRoomFromDB, syncAndGetPlayers, updatePlayerOnline, getPlayerOnline, updateRoomStatus } from '../lib/turso.js';
+import { getPlayerByToken, getRoomFromDB, syncAndGetPlayers, updatePlayerOnline, getPlayerOnline, updateRoomStatus } from '../lib/turso.js';
 
 const db = createClient({
   url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
+const TABLES = {
+  ROOMS: 'room',
+  ROOM_PLAYERS: 'room_player',
+  ANSWERS: 'room_answer',
+};
+
 export class Database {
   constructor() {
     this.db = db;
   }
-  
-  getDb() {
-    return this.db;
-  }
 
-  async getRoom( roomId, playerToken ) {
-    return await getRoomFromDB( this.db, roomId, playerToken );
-  }
-
-  async getAllDbActiveRooms() {
-    return await getAllActiveRooms( this.db );
-  }
-
-  async updateDbRoomStatus( roomId, status ) {
-    return await updateRoomStatus( this.db, roomId, status );
-  }
-
-  async getPlayers( roomId ) {
-    return await getPlayerOnline( this.db, roomId );
-  }
-
-  async getDbPlayerByToken( playerToken ) {
-    return await getPlayerByToken( this.db, playerToken );
-  }
-
-  async getDbPlayersByRoom(roomId) {
-    return await getDbPlayersByRoom(this.db, roomId);
-  }
-
-  async updateDbPlayerOnline( playerToken, isOnline ) {
+  async getAllInitialData() {
     try {
-      await updatePlayerOnline( this.db, playerToken, isOnline );
-      console.log(`✅ Player ${playerToken} logged in & DB online status set`);
-    } catch (dbErr) {
-      console.warn(`⚠️ DB update failed, but player joined:`, dbErr);
+      const initialData = await this.db.batch([
+        {
+          sql: `
+            SELECT * 
+            FROM ${ TABLES.ROOMS }
+          `,
+          args: []
+        },
+        {
+          sql: `
+            SELECT * 
+            FROM ${ TABLES.ROOM_PLAYERS }
+          `,
+          args: []
+        },
+        {
+          sql: `
+            SELECT * 
+            FROM ${ TABLES.ANSWERS }
+          `,
+          args: []
+        },
+      ]);
+  
+      return { 
+        rooms: initialData[0].rows,
+        players: initialData[1].rows,
+        answers: initialData[2].rows
+      };
+    } catch (error) {
+      console.error('Error getting all initial data:', error);
+      throw error;
     }
   }
 
-  async syncDbAndGetPlayers( roomId, activeTokens = [] ) {
-    return await syncAndGetPlayers( this.db, roomId, activeTokens );
+  async getAllRoomData( roomId ) {
+    try {
+      const roomData = await this.db.batch([
+        {
+          sql: `
+            SELECT * 
+            FROM ${ TABLES.ROOM_PLAYERS }
+            WHERE roomId = ?
+          `,
+          args: [ roomId ]
+        },
+        {
+          sql: `
+            SELECT * 
+            FROM ${ TABLES.ANSWERS }
+            WHERE roomId = ?
+          `,
+          args: [ roomId ]
+        },
+      ]);
+      
+      return {
+        players: roomData[0].rows,
+        answers: roomData[1].rows
+      };
+    } catch (error) {
+      console.error('Error getting all room data:', error);
+      throw error;
+    }
   }
+
+  async getRoomById( roomId ) {
+    const result = await this.db.execute({
+      sql: `
+        SELECT * 
+        FROM ${ TABLES.ROOMS }
+        WHERE id = ?
+      `,
+      args: [ roomId ]
+    });
+  
+    return result.rows[0];
+  }
+
+  async getAllRooms() {
+    const result = await this.db.execute({
+      sql: `
+        SELECT * 
+        FROM ${ TABLES.ROOMS }
+      `,
+      args: []
+    });
+  
+    return result.rows;
+  }
+
+  
 }
