@@ -21,6 +21,7 @@ export default class Experience {
     // Events
     this.sockets.on('host-connect', (data) => {
       console.log('Host connected', data);
+      // this.hostConnect( data.socket )( data );
     });
   }
 
@@ -55,15 +56,10 @@ export default class Experience {
   }
 
   hostConnect( socket ) {
-    /**
-     * 1. find or create game
-     * 2. setup host
-     * 3. setup questions
-     * 4. get players from database
-    */
     return async ({ roomId, playerToken, questions }) => {
+      // Game managment
       let game = this.games.get( roomId );
-      if (!game) {
+      if ( !game ) {
         // Game not found, create a new one
         const room = await this.db.getRoomById( roomId );
         const { players, answers } = await this.db.getAllRoomData( roomId );
@@ -77,6 +73,7 @@ export default class Experience {
         game.questions.add( question );
       }
       
+      // Socket management
       socket.join( roomId );
       socket.isHost = true;
       socket.roomId = roomId;
