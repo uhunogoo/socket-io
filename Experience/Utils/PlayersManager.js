@@ -10,7 +10,7 @@ export default class PlayersManager {
     }
 
     this.players.set( playerToken, player );
-    return player;
+    return this;
   }
 
   get( playerToken ) {
@@ -28,10 +28,11 @@ export default class PlayersManager {
     const updatedPlayer = { ...player, ...updateData };
     this.players.set(playerToken, updatedPlayer);
     
-    return updatedPlayer;
+    return this;
   }
 
   destroy( playerToken ) {
     this.players.delete( playerToken );
+    return this;
   }
 }

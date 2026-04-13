@@ -99,6 +99,32 @@ export class Database {
     return result.rows[0];
   }
 
+  async getPlayerByToken( playerToken ) {
+    const result = await this.db.execute({
+      sql: `
+        SELECT * 
+        FROM ${ TABLES.ROOM_PLAYERS }
+        WHERE playerToken = ?
+      `,
+      args: [ playerToken ]
+    });
+  
+    return result.rows[0];
+  }
+
+  async updatePlayer( playerToken, updateData ) {
+    const result = await this.db.execute({
+      sql: `
+        UPDATE ${ TABLES.ROOM_PLAYERS }
+        SET ${ Object.keys(updateData).map(key => `${key} = ?`).join(', ') }
+        WHERE playerToken = ?
+      `,
+      args: [ ...Object.values(updateData), playerToken ]
+    });
+  
+    return result.rows[0];
+  }
+
   async getAllRooms() {
     const result = await this.db.execute({
       sql: `

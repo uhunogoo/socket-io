@@ -1,11 +1,14 @@
+// Core
 import Games from './Utils/Game.js';
-import PlayersManager from './Utils/PlayersManager.js';
+
+// Managers
 import SocketManager from './Utils/SocketsManager.js';
 
-/**
- * 1. Classes and utilities on one layer
- * 2. Data is multi layer if needed  
- */
+// Handlers
+import HandleHost from './Handlers/HandleHost.js';
+import HandlePlayers from './Handlers/HandlePlayers.js';
+import HandleDisconnect from './Handlers/HandleDisconnect.js';
+import HandleRound from './Handlers/HandleRound.js';
 
 export default class Experience {
   constructor( db, io ) {
@@ -15,13 +18,28 @@ export default class Experience {
 
     // Managers
     this.games = new Map();
-    // this.players = new PlayersManager();
     this.sockets = new SocketManager( this.io );
 
+    // Handlers
+    this.hostHandler = new HandleHost( this );
+    this.playerHandler = new HandlePlayers( this );
+    this.disconnectHandler = new HandleDisconnect( this );
+    this.roundsHandler = new HandleRound( this );
+
     // Events
-    this.sockets.on('host-connect', (data) => {
-      console.log('Host connected', data);
-      // this.hostConnect( data.socket )( data );
+    this.sockets.on('host-connect', ( delegatedData ) => {
+      const { socket, data } = delegatedData;
+      this.hostHandler.hostConnect( socket, data );
+    });
+    
+    this.sockets.on('player-connect', ( delegatedData ) => {
+      const { socket, data } = delegatedData;
+      this.playerHandler.playerConnect( socket, data );
+    });
+    
+    this.sockets.on('disconnect', ( delegatedData ) => {
+      const { socket } = delegatedData;
+      this.disconnectHandler.disconnect( socket );
     });
   }
 
@@ -54,57 +72,12 @@ export default class Experience {
 
     return this;
   }
-
-  hostConnect( socket ) {
-    return async ({ roomId, playerToken, questions }) => {
-      // Game managment
-      let game = this.games.get( roomId );
-      if ( !game ) {
-        // Game not found, create a new one
-        const room = await this.db.getRoomById( roomId );
-        const { players, answers } = await this.db.getAllRoomData( roomId );
-        
-        game = this.buildGame( room, players, answers );
-        this.games.set( roomId, game );
-      }
-
-      // Add questions to game
-      for ( const question of questions ) {
-        game.questions.add( question );
-      }
-      
-      // Socket management
-      socket.join( roomId );
-      socket.isHost = true;
-      socket.roomId = roomId;
-
-      const players = game.players.getAll();
-      
-      socket.emit('players-update', { players });
-    };
-  }
-
-  playerConnect() {
-    return async ({ roomId, playerToken }) => {
-      const game = this.games.get( roomId );
-      if (!game) {
-        return socket.emit('error', { message: 'Game not found' });
-      }
-
-      // Clean! The game manages its own players.
-      const player = game.players.get( playerToken );
-      if (!player) {
-        return socket.emit('error', { message: 'Player not found in this game' });
-      }
-
-    };
-  }
   
   buildGame( room, roomPlayers, roomAnswers ) {
     const game = new Games();
     game.room = room;
     roomPlayers.forEach(
-      (player) => game.players.add( player ) 
+      (player) => game.players.add( player )
     );
     game.answers = new Map( roomAnswers.map((answer) => [answer.id, answer]) );
     

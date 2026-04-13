@@ -6,6 +6,7 @@ export default class Game {
     // Game state
     this.state = 'lobby'; // will take from the room -> lobby, playing, finished
     this.currentRound = 0;
+    this.timers = new Map();
     
     // Game data
     this.room = null;

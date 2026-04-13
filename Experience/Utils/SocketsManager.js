@@ -20,20 +20,22 @@ export default class SocketManager extends EventEmitter {
 
   // Register all socket events
   registerEvents(socket) {
-    socket.on('host-connect', (gameData) => {
-      this.emit('host-connect', { socket: socket, gameData });
+    socket.on('host-connect', ( gameData ) => {
+      this.trigger( 'host-connect', [{ socket, data: gameData }] );
     });
 
     socket.on('player-connect', (gameData) => {
-      this.emit('player-connect', { socket: socket, gameData });
+      this.trigger('player-connect', [{ socket, data: gameData }]);
     });
 
     socket.on('disconnect', () => {
-      this.emit('disconnect', { socket: socket });
+      this.trigger('disconnect', [{ socket }]);
     });
 
     socket.on('start-round', (gameData) => {
-      this.emit('start-round', { socket: socket, gameData });
+      this.trigger('start-round', [{ socket, data: gameData }]);
     });
   }
 }
+
+
