@@ -41,6 +41,11 @@ export default class Experience {
       const { socket } = delegatedData;
       this.disconnectHandler.disconnect( socket );
     });
+    
+    this.sockets.on('start-round', ( delegatedData ) => {
+      const { io, data } = delegatedData;
+      this.roundsHandler.startRound( io, data );
+    });
   }
 
   static async create( db, io ) {

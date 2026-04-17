@@ -4,8 +4,6 @@ export default class HandleHost {
   }
 
   async hostConnect( socket, { roomId, playerToken, questions } ) {
-    // console.log({ roomId, playerToken, questions });
-
     // Game managment
     let game = this.experience.games.get( roomId );
     if ( !game ) {
@@ -18,8 +16,10 @@ export default class HandleHost {
     }
 
     // Add questions to game
+    let index = 0;
     for ( const question of questions ) {
-      game.questions.add( question );
+      game.questions.add( index, question );
+      index++;
     }
     
     // Socket management
@@ -28,6 +28,12 @@ export default class HandleHost {
     socket.roomId = roomId;
 
     const players = game.players.getAll();
+    const isGameStarted = game.status === 'playing';
+    
     socket.emit('players-update', { players });
+    if (isGameStarted) {
+      const roundData = game.getRoundData();
+      socket.emit( 'round-started', roundData );
+    }
   }
 }

@@ -41,6 +41,12 @@ export default class HandlePlayers {
     await this.experience.db.updatePlayer( playerToken, playerUpdateData );
 
     const players = game.players.getAll();
-    this.experience.io.to( roomId ).emit('players-update', { players });
+    const isGameStarted = game.status === 'playing';
+    
+    this.experience.io.to( roomId ).emit('players-update', { players, isGameStarted });
+    if (isGameStarted) {
+      const roundData = game.getRoundData();
+      socket.emit( 'round-started', roundData );
+    }
   }
 }

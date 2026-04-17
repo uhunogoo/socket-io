@@ -33,9 +33,7 @@ export default class SocketManager extends EventEmitter {
     });
 
     socket.on('start-round', (gameData) => {
-      this.trigger('start-round', [{ socket, data: gameData }]);
+      this.trigger('start-round', [{ io: this.io, data: gameData }]);
     });
   }
 }
-
-
