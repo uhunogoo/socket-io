@@ -44,9 +44,9 @@ export default class HandlePlayers {
     const isGameStarted = game.status === 'playing';
     
     this.experience.io.to( roomId ).emit('players-update', { players, isGameStarted });
-    if (isGameStarted) {
-      const roundData = game.getRoundData();
-      socket.emit( 'round-started', roundData );
+    if ( isGameStarted ) {
+      const currentRound = game.rounds.getCurrentRound();
+      socket.emit( 'round-started', currentRound );
     }
   }
 }

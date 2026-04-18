@@ -9,6 +9,7 @@ import HandleHost from './Handlers/HandleHost.js';
 import HandlePlayers from './Handlers/HandlePlayers.js';
 import HandleDisconnect from './Handlers/HandleDisconnect.js';
 import HandleRound from './Handlers/HandleRound.js';
+import HandleAnswer from './Handlers/HandleAnswer.js';
 
 export default class Experience {
   constructor( db, io ) {
@@ -25,6 +26,7 @@ export default class Experience {
     this.playerHandler = new HandlePlayers( this );
     this.disconnectHandler = new HandleDisconnect( this );
     this.roundsHandler = new HandleRound( this );
+    this.answerHandler = new HandleAnswer( this );
 
     // Events
     this.sockets.on('host-connect', ( delegatedData ) => {
@@ -45,6 +47,12 @@ export default class Experience {
     this.sockets.on('start-round', ( delegatedData ) => {
       const { io, data } = delegatedData;
       this.roundsHandler.startRound( io, data );
+    });
+
+    this.sockets.on('submit-answer', ( delegatedData ) => {
+      const { data } = delegatedData;
+      console.log( 'submit-answer', data );
+      this.answerHandler.addAnswer( data );
     });
   }
 
@@ -80,11 +88,18 @@ export default class Experience {
   
   buildGame( room, roomPlayers, roomAnswers ) {
     const game = new Games();
+    // Set room data
     game.room = room;
+    game.timeToAnswer = room.timeToAnswer * 1000;
+
+    // Add players to game
     roomPlayers.forEach(
       (player) => game.players.add( player )
     );
-    game.answers = new Map( roomAnswers.map((answer) => [answer.id, answer]) );
+    
+    // Add answers to game
+    // TODO: Implement answer manager later
+    // game.answers = new Map( roomAnswers.map((answer) => [answer.id, answer]) );
     
     return game;
   }

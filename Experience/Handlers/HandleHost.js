@@ -32,8 +32,8 @@ export default class HandleHost {
     
     socket.emit('players-update', { players });
     if (isGameStarted) {
-      const roundData = game.getRoundData();
-      socket.emit( 'round-started', roundData );
+      const currentRound = game.rounds.getCurrentRound();
+      socket.emit( 'round-started', currentRound );
     }
   }
 }

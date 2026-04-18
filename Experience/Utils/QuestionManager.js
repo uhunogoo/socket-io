@@ -15,5 +15,3 @@ export default class QuestionManager {
     return this.questions.size
   }
 }
-
-
