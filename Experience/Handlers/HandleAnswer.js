@@ -3,7 +3,7 @@ export default class HandleAnswer {
     this.experience = experience;
   }
 
-  addAnswer({ roomId, playerId, index }) {
+  addAnswer({ roomId, playerId, questionType, answer }) {
     const game = this.experience.games.get( roomId );
     const isPlaying = game?.status === 'playing';
     if ( !game || !isPlaying ) return;
@@ -15,9 +15,20 @@ export default class HandleAnswer {
     // Check if answer is correct
     const question = game.questions.get( game.currentRound );
     if ( !question ) return;
+
+    let isCorrect = false;
+    if (questionType === 'single') {
+      isCorrect = question.correctAnswerIndex === answer.index;
+    } else if (questionType === 'sequence') {
+      const correctSequence = [...question.correctSequence].join(',');
+      const currentAnswer = [...answer].join(',');
+
+      isCorrect = correctSequence === currentAnswer;
+    }
     
+    const answerData = { index: game.currentRound, isCorrect };
+
     // Add the answer
-    const isCorrect = question.correctAnswerIndex === index;
-    game.answers.add( playerId, { index, isCorrect } );
+    game.answers.add( playerId, answerData );
   }
 }
