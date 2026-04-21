@@ -45,7 +45,6 @@ export default class HandleRound extends EventEmitter {
 
     // Prepare game for next round
     game.status = 'between_rounds';
-    game.rounds.switchToNextRound();
     
     // Clear round timer
     const existingTimer = game.timers.get( 'roundTimer' );
@@ -53,9 +52,14 @@ export default class HandleRound extends EventEmitter {
       clearTimeout( existingTimer );
     }
 
+    // Add missing answers
+    game.answers.addMissingAnswers();
+
     // Flush answers
     const batch = game.answers.flushRound();
-    console.log('Batch data:', batch);
+
+    // Switch to next round
+    game.rounds.switchToNextRound();
 
     // End current round
     io.to( roomId ).emit( 'round-ended', { batch } );

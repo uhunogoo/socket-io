@@ -12,9 +12,9 @@ export default class HandleAnswer {
     const existingAnswer = game.answers.getByPlayerId( playerId );
     if ( existingAnswer ) return;
 
-    // Check if answer is correct
+    // Check question and answer
     const question = game.questions.get( game.currentRound );
-    if ( !question ) return;
+    if ( !question || !answer ) return;
 
     let isCorrect = false;
     if (questionType === 'single') {

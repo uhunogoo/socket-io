@@ -54,6 +54,12 @@ export default class Experience {
       console.log( 'submit-answer', data );
       this.answerHandler.addAnswer( data );
     });
+    
+    this.roundsHandler.on( 'game-over', () => {
+      console.log( 'Game over' );
+      // const { io, data } = delegatedData;
+      // this.roundsHandler.endRound( io, data );
+    } );
   }
 
   static async create( db, io ) {

@@ -27,8 +27,8 @@ export default class RoundManager extends EventEmitter {
     const gameData = this.game.getGameData();
 
     // Game is over
-    if ( gameData.currentRound >= gameData.questionsCount ) {
-      this.emit( 'game-over' );
+    if ( ( gameData.currentRound + 1 ) >= gameData.questionsCount ) {
+      this.trigger( 'game-over' );
       return;
     }
 

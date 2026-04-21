@@ -84,6 +84,27 @@ export default class AnswerManager {
     return batchData;
   }
 
+  addMissingAnswers() {
+    const currentRound = this.game.rounds.get(this.game.currentRound);
+    if (!currentRound) return;
+
+    const players = this.game.players.getAll();
+    for ( const player of players ) {
+      const playerId = player.playerToken;
+      if ( this.tempAnswers.has( playerId ) ) continue;
+
+      this.tempAnswers.set( playerId, {
+        playerId,
+        questionId: currentRound.questionId,
+        answerId: -1,
+        isCorrect: false,
+        responseTime: this.game.timeToAnswer,
+        scoreEarned: 0,
+        createdAt: Date.now(),
+      } );
+    }
+  }
+
   get( roundIndex ) {
     return this.answersHistory.get( roundIndex ) || [];
   }
