@@ -30,7 +30,8 @@ export default class HandleHost {
     const players = game.players.getAll();
     const isGameStarted = game.status === 'playing';
     
-    socket.emit('players-update', { players });
+    this.experience.notifier.playerUpdate( roomId, players, isGameStarted );
+
     if (isGameStarted) {
       const currentRound = game.rounds.getCurrentRound();
       socket.emit( 'round-started', currentRound );

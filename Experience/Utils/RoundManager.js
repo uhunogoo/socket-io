@@ -23,15 +23,6 @@ export default class RoundManager extends EventEmitter {
   }
 
   switchToNextRound() {
-    // Get current round data
-    const gameData = this.game.getGameData();
-
-    // Game is over
-    if ( ( gameData.currentRound + 1 ) >= gameData.questionsCount ) {
-      this.trigger( 'game-over' );
-      return;
-    }
-
     // Move to next round
     this.game.currentRound++;
     // this.emit( 'round-changed', this.game.currentRound );

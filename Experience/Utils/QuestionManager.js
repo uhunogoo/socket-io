@@ -6,7 +6,8 @@ export default class QuestionManager {
     this.questions.set( index, question );
   }
   get( questionId ) {
-    return this.questions.get( questionId );
+    const question = this.questions.get( questionId );
+    return question;
   }
   getAll() {
     return Array.from( this.questions.values() )

@@ -6,7 +6,8 @@ export default class HandlePlayers {
   async playerConnect( socket, { roomId, playerToken } )  {
     const game = this.experience.games.get( roomId );
     if (!game) {
-      return socket.emit('error', { message: 'Game not found' });
+      this.experience.notifier.error( socket, 'Game not found' );
+      return;
     }
 
     socket.join( roomId );
@@ -43,7 +44,7 @@ export default class HandlePlayers {
     const players = game.players.getAll();
     const isGameStarted = game.status === 'playing';
     
-    this.experience.io.to( roomId ).emit('players-update', { players, isGameStarted });
+    this.experience.notifier.playerUpdate( roomId, players, isGameStarted );
     if ( isGameStarted ) {
       const currentRound = game.rounds.getCurrentRound();
       socket.emit( 'round-started', currentRound );

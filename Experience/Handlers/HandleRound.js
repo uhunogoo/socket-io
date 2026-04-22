@@ -10,7 +10,8 @@ export default class HandleRound extends EventEmitter {
   startRound( io, { roomId } ) {
     const game = this.experience.games.get( roomId );
     if ( !game ) {
-      return io.to( roomId ).emit('error', { message: 'Room not found' });
+      this.experience.notifier.error( io, 'Room not found' );
+      return;
     }
     
     game.status = 'playing';
@@ -34,13 +35,14 @@ export default class HandleRound extends EventEmitter {
     game.rounds.add( gameData.currentRound, roundData );
     
     // Notify players
-    io.to( roomId ).emit( 'round-started', roundData );
+    this.experience.notifier.roundStarted( roomId, roundData );
   }
 
   endRound( io, { roomId } ) {
     const game = this.experience.games.get( roomId );
     if ( !game ) {
-      return io.to( roomId ).emit('error', { message: 'Room not found' });
+      this.experience.notifier.error( io, 'Room not found' );
+      return;
     }
 
     // Prepare game for next round
@@ -57,12 +59,30 @@ export default class HandleRound extends EventEmitter {
 
     // Flush answers
     const batch = game.answers.flushRound();
-
-    // Switch to next round
-    game.rounds.switchToNextRound();
-
+    
     // End current round
-    io.to( roomId ).emit( 'round-ended', { batch } );
+    // this.experience.notifier.roundEnded( roomId, batch );
+
+    // Check if game is over
+    this.isGameOver( game );
+    
+    // If game is not over, switch to next round
+    if ( game.status !== 'finished' ) {
+      game.rounds.switchToNextRound();
+  
+      // console.log( 'All answers: ', game.answers.answersHistory );  
+    }
+  }
+
+  isGameOver( game ) {
+    // Get current round data
+    const gameData = game.getGameData();
+
+    // Game is over
+    if ( ( gameData.currentRound + 1 ) >= gameData.questionsCount ) {
+      game.status = 'finished';
+      this.trigger( 'game-over' );
+    }
   }
 }
 

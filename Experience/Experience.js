@@ -3,6 +3,7 @@ import Games from './Utils/Game.js';
 
 // Managers
 import SocketManager from './Utils/SocketsManager.js';
+import ClientNotifire from './Utils/ClientNotifire.js';
 
 // Handlers
 import HandleHost from './Handlers/HandleHost.js';
@@ -20,6 +21,7 @@ export default class Experience {
     // Managers
     this.games = new Map();
     this.sockets = new SocketManager( this.io );
+    this.notifier = new ClientNotifire( this.io );
 
     // Handlers
     this.hostHandler = new HandleHost( this );
@@ -96,7 +98,8 @@ export default class Experience {
     const game = new Games();
     // Set room data
     game.room = room;
-    game.timeToAnswer = room.timeToAnswer * 1000;
+    // game.timeToAnswer = room.timeToAnswer * 1000;
+    game.timeToAnswer = 8 * 1000;
 
     // Add players to game
     roomPlayers.forEach(

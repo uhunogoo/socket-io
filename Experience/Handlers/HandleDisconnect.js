@@ -25,7 +25,8 @@ export default class HandleDisconnect {
 
       // Broadcast updated player list
       const players = game.players.getAll();
-      this.experience.io.to( roomId ).emit('players-update', { players });
+      
+      this.experience.notifier.playerUpdate( roomId, players );
     }
   }
 }
