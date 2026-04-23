@@ -10,7 +10,7 @@ export default class PlayersManager {
     }
 
     this.players.set( playerToken, player );
-    return this;
+    return player;
   }
 
   get( playerToken ) {
@@ -28,7 +28,7 @@ export default class PlayersManager {
     const updatedPlayer = { ...player, ...updateData };
     this.players.set(playerToken, updatedPlayer);
     
-    return this;
+    return updatedPlayer;
   }
 
   destroy( playerToken ) {

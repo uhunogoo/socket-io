@@ -13,7 +13,7 @@ export default class HandleAnswer {
     if ( existingAnswer ) return;
 
     // Check question and answer
-    const question = game.questions.get( game.currentRound );
+    const question = game.questions[ game.currentRound ];
     if ( !question || !answer ) return;
 
     let isCorrect = false;

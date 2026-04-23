@@ -1,4 +1,4 @@
-import EventEmitter from './EventEmitter.js';
+import { EventEmitter } from 'events';
 
 export default class SocketManager extends EventEmitter {
   constructor(io) {
@@ -13,31 +13,31 @@ export default class SocketManager extends EventEmitter {
 
   // Set up the connection listener
   setConnection() {
-    this.io.on('connection', (socket) => {
+    this.io.on( 'connection', ( socket ) => {
       this.registerEvents( socket );
-    });
+    } );
   }
 
   // Register all socket events
   registerEvents( socket ) {
-    socket.on('host-connect', ( gameData ) => {
-      this.trigger( 'host-connect', [{ socket, data: gameData }] );
-    });
+    socket.on( 'host-connect', ( gameData ) => {
+      this.emit( 'host-connect', { socket, data: gameData } );
+    } );
 
-    socket.on('player-connect', ( gameData ) => {
-      this.trigger('player-connect', [{ socket, data: gameData }]);
-    });
+    socket.on( 'player-connect', ( gameData ) => {
+      this.emit( 'player-connect', { socket, data: gameData } );
+    } );
 
-    socket.on('disconnect', () => {
-      this.trigger('disconnect', [{ socket }]);
-    });
+    socket.on( 'disconnect', () => {
+      this.emit( 'disconnect', { socket } );
+    } );
 
-    socket.on('start-round', ( gameData ) => {
-      this.trigger('start-round', [{ io: this.io, data: gameData }]);
-    });
+    socket.on( 'start-round', ( gameData ) => {
+      this.emit( 'start-round', { io: this.io, data: gameData } );
+    } );
     
-    socket.on('submit-answer', ( gameData ) => {
-      this.trigger('submit-answer', [{ io: this.io, data: gameData }]);
-    });
+    socket.on( 'submit-answer', ( gameData ) => {
+      this.emit( 'submit-answer', { io: this.io, data: gameData } );
+    } );
   }
 }

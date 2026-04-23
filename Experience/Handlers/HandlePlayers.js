@@ -4,9 +4,12 @@ export default class HandlePlayers {
   }
 
   async playerConnect( socket, { roomId, playerToken } )  {
-    const game = this.experience.games.get( roomId );
+    const experience = this.experience;
+    const { notifier, repositories } = experience;
+
+    const game = experience.games.get( roomId );
     if (!game) {
-      this.experience.notifier.error( socket, 'Game not found' );
+      notifier.error( socket, 'Game not found' );
       return;
     }
 
@@ -15,7 +18,7 @@ export default class HandlePlayers {
     socket.roomId = roomId;
     socket.playerToken = playerToken;
 
-    // Clean! The game manages its own players.
+    // Game manages its own players.
     const playerService = game.players;
     const player = playerService.get( playerToken );
     const playerUpdateData = {
@@ -23,30 +26,34 @@ export default class HandlePlayers {
       lastSeenAt: new Date()
     };
 
+    let updatedPlayer;
     if (!player) {
-      const playerData = await this.experience.db.getPlayerByToken( playerToken );
+      const playerData = await repositories.player.getByToken( playerToken );
       if (!playerData) {
-        return socket.emit('error', { message: 'Player not found' });
+        return notifier.error( socket, 'Player not found' );
       }
       
       // Add player to game
-      playerService.add( {
+      updatedPlayer = playerService.add( {
         ...playerData,
         ...playerUpdateData
       } );
     } else {
       // Player already exists, update their data
-      playerService.update( playerToken, playerUpdateData );
+      updatedPlayer = playerService.update( playerToken, playerUpdateData );
     }
 
-    await this.experience.db.updatePlayer( playerToken, playerUpdateData );
+    await repositories.player.update( 
+      playerToken,
+      updatedPlayer
+    );
 
     const players = game.players.getAll();
     const isGameStarted = game.status === 'playing';
     
-    this.experience.notifier.playerUpdate( roomId, players, isGameStarted );
+    notifier.playerUpdate( roomId, players, isGameStarted );
     if ( isGameStarted ) {
-      const currentRound = game.rounds.getCurrentRound();
+      const currentRound = game.getCurrentRound();
       socket.emit( 'round-started', currentRound );
     }
   }

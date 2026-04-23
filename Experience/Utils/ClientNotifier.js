@@ -1,6 +1,6 @@
 import { createResponse, sanitizePlayer, sanitizeQuestion } from './responseUtils.js';
 
-export default class ClientNotifire {
+export default class ClientNotifier {
   constructor( io ) {
     this.io = io;
   }

@@ -3,7 +3,7 @@ import Games from './Utils/Game.js';
 
 // Managers
 import SocketManager from './Utils/SocketsManager.js';
-import ClientNotifire from './Utils/ClientNotifire.js';
+import ClientNotifier from './Utils/ClientNotifier.js';
 
 // Handlers
 import HandleHost from './Handlers/HandleHost.js';
@@ -11,6 +11,10 @@ import HandlePlayers from './Handlers/HandlePlayers.js';
 import HandleDisconnect from './Handlers/HandleDisconnect.js';
 import HandleRound from './Handlers/HandleRound.js';
 import HandleAnswer from './Handlers/HandleAnswer.js';
+
+// Repositories
+import RoomRepository from './Repositories/RoomRepository.js';
+import PlayerRepository from './Repositories/PlayerRepository.js';
 
 export default class Experience {
   constructor( db, io ) {
@@ -21,7 +25,11 @@ export default class Experience {
     // Managers
     this.games = new Map();
     this.sockets = new SocketManager( this.io );
-    this.notifier = new ClientNotifire( this.io );
+    this.notifier = new ClientNotifier( this.io );
+    this.repositories = {
+      room: new RoomRepository( this.db ),
+      player: new PlayerRepository( this.db )
+    };
 
     // Handlers
     this.hostHandler = new HandleHost( this );
@@ -59,8 +67,6 @@ export default class Experience {
     
     this.roundsHandler.on( 'game-over', () => {
       console.log( 'Game over' );
-      // const { io, data } = delegatedData;
-      // this.roundsHandler.endRound( io, data );
     } );
   }
 
@@ -77,7 +83,7 @@ export default class Experience {
       return;
     }
     
-    const { rooms, players, answers } = await this.db.getAllInitialData();
+    const { rooms, players, answers } = await this.repositories.room.getAllInitialData();
 
     for ( const room of rooms ) {
       const roomPlayers = players.filter( (player) => player.roomId === room.id );

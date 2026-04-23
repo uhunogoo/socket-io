@@ -1,5 +1,4 @@
-import EventEmitter from '../Utils/EventEmitter.js';
-import { copyObject } from '../../lib/helpers.js';
+import { EventEmitter } from 'events';
 
 export default class HandleRound extends EventEmitter {
   constructor( experience ) {
@@ -14,11 +13,8 @@ export default class HandleRound extends EventEmitter {
       return;
     }
     
-    game.status = 'playing';
-    
-    // Game data
-    const gameData = game.getGameData();
-    const roundStartedAt = Date.now();
+    // Start round
+    const roundData = game.startRound();
     
     // Round timer
     const existingTimer = game.timers.get( 'roundTimer' );
@@ -29,11 +25,7 @@ export default class HandleRound extends EventEmitter {
     game.timers.set( 'roundTimer', setTimeout(() => {
       this.endRound( io, { roomId } );
     }, game.timeToAnswer ) );
-
-    // Add round data
-    const roundData = copyObject({ ...gameData, roundStartedAt });
-    game.rounds.add( gameData.currentRound, roundData );
-    
+  
     // Notify players
     this.experience.notifier.roundStarted( roomId, roundData );
   }
@@ -68,7 +60,7 @@ export default class HandleRound extends EventEmitter {
     
     // If game is not over, switch to next round
     if ( game.status !== 'finished' ) {
-      game.rounds.switchToNextRound();
+      game.switchToNextRound();
   
       // console.log( 'All answers: ', game.answers.answersHistory );  
     }
@@ -81,7 +73,7 @@ export default class HandleRound extends EventEmitter {
     // Game is over
     if ( ( gameData.currentRound + 1 ) >= gameData.questionsCount ) {
       game.status = 'finished';
-      this.trigger( 'game-over' );
+      this.emit( 'game-over' );
     }
   }
 }

@@ -24,7 +24,7 @@ export default class AnswerManager {
     if (!answerData || !this.game) return;
 
     const submittedAt = Date.now();
-    const currentRound = this.game.rounds.get(this.game.currentRound);
+    const currentRound = this.game.getCurrentRound();
     
     if (!currentRound) return;
 
@@ -85,7 +85,7 @@ export default class AnswerManager {
   }
 
   addMissingAnswers() {
-    const currentRound = this.game.rounds.get(this.game.currentRound);
+    const currentRound = this.game.getCurrentRound();
     if (!currentRound) return;
 
     const players = this.game.players.getAll();

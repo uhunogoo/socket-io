@@ -4,23 +4,22 @@ export default class HandleHost {
   }
 
   async hostConnect( socket, { roomId, playerToken, questions } ) {
+    const experience = this.experience;
+    const { notifier, repositories } = experience;
+    
     // Game managment
-    let game = this.experience.games.get( roomId );
+    let game = experience.games.get( roomId );
     if ( !game ) {
       // Game not found, create a new one
-      const room = await this.experience.db.getRoomById( roomId );
-      const { players, answers } = await this.experience.db.getAllRoomData( roomId );
+      const room = await repositories.room.getOrCreate( roomId );
+      const { players, answers } = await repositories.room.getFullRoomData( roomId );
       
-      game = this.experience.buildGame( room, players, answers );
-      this.experience.games.set( roomId, game );
+      game = experience.buildGame( room, players, answers );
+      experience.games.set( roomId, game );
     }
 
     // Add questions to game
-    let index = 0;
-    for ( const question of questions ) {
-      game.questions.add( index, question );
-      index++;
-    }
+    game.questions = questions;
     
     // Socket management
     socket.join( roomId );
@@ -30,10 +29,10 @@ export default class HandleHost {
     const players = game.players.getAll();
     const isGameStarted = game.status === 'playing';
     
-    this.experience.notifier.playerUpdate( roomId, players, isGameStarted );
+    notifier.playerUpdate( roomId, players, isGameStarted );
 
     if (isGameStarted) {
-      const currentRound = game.rounds.getCurrentRound();
+      const currentRound = game.getCurrentRound();
       socket.emit( 'round-started', currentRound );
     }
   }
