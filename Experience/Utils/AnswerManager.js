@@ -3,10 +3,10 @@
 //   id: text( 'id' ).primaryKey(),
 //   roomId: text( 'roomId' ).notNull().references(() => rooms.id, { onDelete: 'cascade' }),
 //   playerId: text( 'playerId' ).notNull().references(() => roomPlayers.id, { onDelete: 'cascade' }),
-//   questionId: text( 'questionId' ).notNull(), // Question ID from Sanity
-//   answerId: integer( 'answerId' ).notNull(),
+//   answerId: integer( 'answerId' ).notNull(), // Answer ID basycally round number
 //   isCorrect: integer( 'isCorrect', { mode: 'boolean' } ).notNull(),
 //   responseTime: integer( 'responseTime' ).notNull(), // time to answer in ms
+//   answerStreak: integer( 'answerStreak' ).default(0).notNull(),
 //   scoreEarned: integer( 'scoreEarned' ).default(0).notNull(),
 //   createdAt: integer( 'createdAt', { mode: 'timestamp' } ).notNull(),
 // }

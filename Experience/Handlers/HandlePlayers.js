@@ -1,60 +1,54 @@
 export default class HandlePlayers {
-  constructor( experience ) {
+  constructor(experience) {
     this.experience = experience;
   }
 
-  async playerConnect( socket, { roomId, playerToken } )  {
+  async playerConnect(socket, { roomId, playerToken }) {
     const experience = this.experience;
     const { notifier, repositories } = experience;
 
-    const game = experience.games.get( roomId );
+    const game = experience.games.get(roomId);
     if (!game) {
-      notifier.error( socket, 'Game not found' );
+      notifier.error(socket, 'Game not found');
       return;
     }
 
-    socket.join( roomId );
+    socket.join(roomId);
     socket.isHost = false;
     socket.roomId = roomId;
     socket.playerToken = playerToken;
 
     // Game manages its own players.
     const playerService = game.players;
-    const player = playerService.get( playerToken );
-    const playerUpdateData = {
-      isConnected: 1,
-      lastSeenAt: new Date()
-    };
-
-    let updatedPlayer;
-    if (!player) {
-      const playerData = await repositories.player.getByToken( playerToken );
-      if (!playerData) {
-        return notifier.error( socket, 'Player not found' );
-      }
-      
-      // Add player to game
-      updatedPlayer = playerService.add( {
-        ...playerData,
-        ...playerUpdateData
-      } );
-    } else {
-      // Player already exists, update their data
-      updatedPlayer = playerService.update( playerToken, playerUpdateData );
-    }
-
-    await repositories.player.update( 
-      playerToken,
-      updatedPlayer
-    );
-
-    const players = game.players.getAll();
     const isGameStarted = game.status === 'playing';
     
-    notifier.playerUpdate( roomId, players, isGameStarted );
-    if ( isGameStarted ) {
+    try {
+      const playerData = await repositories.player.getByToken( playerToken );
+      if (!playerData) {
+        return notifier.error(socket, 'Player not found');
+      }
+
+      const playerUpdateData = {
+        ...playerData,
+        isConnected: 1,
+        lastSeenAt: new Date(),
+      };
+
+      await repositories.player.update( playerToken, playerUpdateData );
+      playerService.upsert(playerToken, playerUpdateData);
+
+      // Success path continues
+      const players = game.players.getAll();
+      notifier.playerUpdate( roomId, players, isGameStarted );
+    } catch (error) {
+      console.error('Player connection failed:', error);
+      notifier.error(socket, 'Connection failed, please retry');
+      socket.disconnect();
+    }
+
+    if (isGameStarted) {
       const currentRound = game.getCurrentRound();
-      socket.emit( 'round-started', currentRound );
+      socket.emit('round-started', currentRound);
     }
   }
 }

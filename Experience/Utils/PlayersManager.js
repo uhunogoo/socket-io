@@ -3,16 +3,6 @@ export default class PlayersManager {
     this.players = new Map();
   }
 
-  add( player ) {
-    const { playerToken } = player;
-    if ( this.players.has( playerToken ) ) {
-      throw new Error(`Player "${playerToken}" already exists in this service.`);
-    }
-
-    this.players.set( playerToken, player );
-    return player;
-  }
-
   get( playerToken ) {
     return this.players.get( playerToken );
   }
@@ -21,18 +11,27 @@ export default class PlayersManager {
     return Array.from( this.players.values() );
   }
 
-  update( playerToken, updateData ) {
+  upsert( playerToken, playerData ) {
     const player = this.players.get( playerToken );
-    if (!player) return false;
     
-    const updatedPlayer = { ...player, ...updateData };
-    this.players.set(playerToken, updatedPlayer);
-    
-    return updatedPlayer;
+    // If player exists, update it
+    if ( player ) {
+      const updatedPlayer = { 
+        ...player, 
+        ...playerData 
+      };
+
+      this.players.set( playerToken, updatedPlayer );
+      return updatedPlayer;
+    }
+
+    // If player doesn't exist, create it
+    this.players.set( playerToken, playerData );
+    return playerData;
   }
 
   destroy( playerToken ) {
     this.players.delete( playerToken );
-    return this;
+    return this.getAll();
   }
 }

@@ -109,7 +109,7 @@ export default class Experience {
 
     // Add players to game
     roomPlayers.forEach(
-      (player) => game.players.add( player )
+      (player) => game.players.upsert( player.playerToken, player )
     );
     
     // Add answers to game
@@ -118,9 +118,4 @@ export default class Experience {
     
     return game;
   }
-
-  startRound() {}
-  endRound() {}
-  update() {}
-  destroy() {}
 }
