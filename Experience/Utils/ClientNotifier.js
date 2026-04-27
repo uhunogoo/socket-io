@@ -26,8 +26,6 @@ export default class ClientNotifier {
       startsAt: Date.now(),
       playersCount: roundData.players?.length
     } );
-
-    console.log(payload);
     
     this.io.to( roomId ).emit( 'round-started', payload );
   }
@@ -35,7 +33,7 @@ export default class ClientNotifier {
   roundEnded( roomId, results, leaderboard ) {
     const payload = createResponse( 'round-ended', {
       results: results.map( r => ({
-        playerToken: r.playerId,
+        playerToken: r.playerToken,
         isCorrect: r.isCorrect,
         scoreEarned: r.scoreEarned,
         responseTime: r.responseTime
@@ -51,7 +49,9 @@ export default class ClientNotifier {
   }
 
   // Personal events
-  answerAccepted( socket, playerAnswer, answer ) {}
+  answerAccepted( socket, playerAnswer, answer ) {
+    // TODO: Implement answer accepted notification
+  }
 
   // Error
   error( socket, message ) {

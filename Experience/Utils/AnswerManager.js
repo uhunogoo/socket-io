@@ -1,16 +1,3 @@
-// Schema for answer table
-// {
-//   id: text( 'id' ).primaryKey(),
-//   roomId: text( 'roomId' ).notNull().references(() => rooms.id, { onDelete: 'cascade' }),
-//   playerId: text( 'playerId' ).notNull().references(() => roomPlayers.id, { onDelete: 'cascade' }),
-//   answerId: integer( 'answerId' ).notNull(), // Answer ID basycally round number
-//   isCorrect: integer( 'isCorrect', { mode: 'boolean' } ).notNull(),
-//   responseTime: integer( 'responseTime' ).notNull(), // time to answer in ms
-//   answerStreak: integer( 'answerStreak' ).default(0).notNull(),
-//   scoreEarned: integer( 'scoreEarned' ).default(0).notNull(),
-//   createdAt: integer( 'createdAt', { mode: 'timestamp' } ).notNull(),
-// }
-
 export default class AnswerManager {
   #SCORE_THRESHOLD = 0.1;
 
@@ -20,35 +7,42 @@ export default class AnswerManager {
     this.tempAnswers = new Map();
   }
 
-  add( playerId, answerData ) {
-    if (!answerData || !this.game) return;
-
+  createAnswerRecord( playerToken, answerData, overrides = {} ) {
     const submittedAt = Date.now();
-    const currentRound = this.game.getCurrentRound();
-    
-    if (!currentRound) return;
+    const roundData = this.game.getCurrentRound();
+    const playerStreak = this.getPlayerStreak( playerToken );
+    const nextStreak = answerData.isCorrect ? playerStreak + 1 : 0;
 
-    // Calculate metrics
-    const timeTaken = Math.max(0, submittedAt - (currentRound.roundStartedAt || 0));
+    // Calculate score
     let score = 0;
-    
-    // Calculate score (in-Memory)
-    if (answerData.isCorrect) {
-      const timeRatio = Math.min(timeTaken / this.game.timeToAnswer, 1);
-      const timeBonus = Math.max(this.#SCORE_THRESHOLD, 1 - timeRatio);
-      score = Math.round(timeBonus * this.game.maxScore);
+    if ( answerData.isCorrect && roundData ) {
+      const timeTaken = Math.max( 0, submittedAt - (roundData.roundStartedAt || 0) );
+      const timeRatio = Math.min( timeTaken / this.game.timeToAnswer, 1 );
+      const timeBonus = Math.max( this.#SCORE_THRESHOLD, 1 - timeRatio );
+      score = Math.round( timeBonus * this.game.maxScore );
     }
 
-    // Store the answer with calculated score
-    this.tempAnswers.set( playerId, {
-      playerId,
-      questionId: currentRound.questionId,
+    return {
+      playerToken,
       answerId: answerData.index,
       isCorrect: answerData.isCorrect,
-      responseTime: timeTaken,
+      responseTime: answerData.responseTime ?? this.game.timeToAnswer,
+      answerStreak: nextStreak,
       scoreEarned: score,
       createdAt: submittedAt,
-    } );
+      ...overrides,
+    };
+  }
+
+  add( playerToken, answerData ) {
+    if ( !answerData || !this.game ) return;
+    if ( !this.game.currentRound ) return;
+
+    // Create answer
+    const answer = this.createAnswerRecord( playerToken, answerData );
+
+    // Store the answer with calculated score
+    this.tempAnswers.set( playerToken, answer );
   }
 
   flushRound() {
@@ -59,25 +53,19 @@ export default class AnswerManager {
     const roomId = this.game.room.id;
 
     // Convert Map to Array of Objects matching your Schema
-    for (const [playerId, data] of this.tempAnswers.entries()) {
+    for ( const [ playerToken, data ] of this.tempAnswers.entries() ) {
       const record = {
         id: crypto.randomUUID(),
-        roomId,
-        playerId: playerId,
-        questionId: data.questionId,
-        answerId: data.answerId,
-        isCorrect: data.isCorrect,
-        responseTime: data.responseTime,
-        scoreEarned: data.scoreEarned,
-        createdAt: new Date(data.createdAt), // Ensure Date object for DB
+        roomId: roomId,
+        playerToken: playerToken,
+        ...data,
       };
+
       batchData.push( record );
     }
 
-    // Save to History
+    // Save to History and clear temporary memory
     this.answersHistory.set( roundIndex, batchData );
-
-    // Clear Temporary Memory
     this.tempAnswers.clear();
 
     // Return data
@@ -86,31 +74,40 @@ export default class AnswerManager {
 
   addMissingAnswers() {
     const currentRound = this.game.getCurrentRound();
-    if (!currentRound) return;
+    if ( !currentRound ) return;
 
     const players = this.game.players.getAll();
     for ( const player of players ) {
-      const playerId = player.playerToken;
-      if ( this.tempAnswers.has( playerId ) ) continue;
+      const playerToken = player.playerToken;
+      if ( this.tempAnswers.has( playerToken ) ) continue;
 
-      this.tempAnswers.set( playerId, {
-        playerId,
-        questionId: currentRound.questionId,
-        answerId: -1,
+      const answer = this.createAnswerRecord( playerToken, {
+        index: -1,
         isCorrect: false,
         responseTime: this.game.timeToAnswer,
-        scoreEarned: 0,
-        createdAt: Date.now(),
       } );
+
+      this.tempAnswers.set( playerToken, answer );
     }
+  }
+
+  getPlayerStreak( playerToken ) {
+    // Get last round's answer from history
+    const previousRoundIndex = this.game.currentRound - 1;
+    const previousAnswers = this.answersHistory.get( previousRoundIndex );
+    
+    if ( !previousAnswers ) return 0;
+    
+    const playerAnswer = previousAnswers.find( a => a.playerToken === playerToken );
+    return playerAnswer?.answerStreak ?? 0;
   }
 
   get( roundIndex ) {
     return this.answersHistory.get( roundIndex ) || [];
   }
 
-  getByPlayerId( playerId ) {
-    return this.tempAnswers.get( playerId ) || null;
+  getByplayerToken( playerToken ) {
+    return this.tempAnswers.get( playerToken ) || null;
   }
 
   getCurrentRoundAnswers() {
