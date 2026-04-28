@@ -60,7 +60,7 @@ export default class HandleRound extends EventEmitter {
         streak: answer.answerStreak
       } );
     }
-    experience.repositories.answers.saveBatch( batch );
+    // experience.repositories.answers.saveBatch( batch );
     
     // End current round
     // this.experience.notifier.roundEnded( roomId, batch );

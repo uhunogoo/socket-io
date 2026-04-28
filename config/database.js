@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import { createClient } from '@libsql/client';
-import { getPlayerByToken, getRoomFromDB, syncAndGetPlayers, updatePlayerOnline, getPlayerOnline, updateRoomStatus } from '../lib/turso.js';
 
 const db = createClient({
   url: process.env.TURSO_DATABASE_URL,
@@ -125,53 +124,23 @@ export class Database {
     return result.rows[0];
   }
 
-  async saveBatchAnswers( batchAnswers = [] ) {
-    if ( !Array.isArray( batchAnswers ) || batchAnswers.length === 0 ) {
-      return { success: false, message: 'No answers to insert' };
+  async batch( batch = [] ) {
+    if ( !Array.isArray( batch ) || batch.length === 0 ) {
+      return { success: false, message: 'No data to insert' };
     }
 
     try {
-      const combineInserts = batchAnswers.map( ans => {
-        const id = ans.id || crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2);
 
-        return {
-          sql: `
-            INSERT INTO ${TABLES.ANSWERS} (
-              id,
-              roomId,
-              playerId,
-              answerId,
-              isCorrect,
-              responseTime,
-              answerStreak,
-              scoreEarned,
-              createdAt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `,
-          args: [
-            id,
-            ans.roomId,
-            ans.playerId,
-            ans.answerId,
-            ans.isCorrect ? 1 : 0,
-            ans.responseTime,
-            ans.answerStreak ?? 0,
-            ans.scoreEarned ?? 0,
-            Math.floor( ans.createdAt / 1000 )
-          ]
-        };
-      });
-
-      const result = await this.db.batch( combineInserts );
+      const result = await this.db.batch( batch );
       
       return {
         success: true,
-        message: 'Answers created successfully',
+        message: 'Data inserted successfully',
         data: result
       };
 
     } catch (error) {
-      console.error('Error creating answers:', error);
+      console.error('Error inserting data:', error);
       throw error;
     }
   }
