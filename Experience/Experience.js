@@ -15,6 +15,7 @@ import HandleAnswer from './Handlers/HandleAnswer.js';
 // Repositories
 import RoomRepository from './Repositories/RoomRepository.js';
 import PlayerRepository from './Repositories/PlayerRepository.js';
+import AnswersRepository from './Repositories/AnswersRepository.js';
 
 export default class Experience {
   constructor( db, io ) {
@@ -28,7 +29,8 @@ export default class Experience {
     this.notifier = new ClientNotifier( this.io );
     this.repositories = {
       room: new RoomRepository( this.db ),
-      player: new PlayerRepository( this.db )
+      player: new PlayerRepository( this.db ),
+      answers: new AnswersRepository( this.db )
     };
 
     // Handlers

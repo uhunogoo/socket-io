@@ -30,19 +30,15 @@ export default class ClientNotifier {
     this.io.to( roomId ).emit( 'round-started', payload );
   }
 
-  roundEnded( roomId, results, leaderboard ) {
+  roundEnded( roomId, answers ) {
     const payload = createResponse( 'round-ended', {
-      results: results.map( r => ({
-        playerToken: r.playerToken,
-        isCorrect: r.isCorrect,
-        scoreEarned: r.scoreEarned,
-        responseTime: r.responseTime
-      }) ),
-      leaderboard: leaderboard.map( p => ({
-        token: p.playerToken,
-        name: p.name,
-        totalScore: p.totalScore
-      }) )
+      results: answers.map( answer => ( {
+        playerToken: answer.playerToken,
+        isCorrect: answer.isCorrect,
+        scoreEarned: answer.scoreEarned,
+        responseTime: answer.responseTime,
+        answerStreak: answer.answerStreak
+      } ))
     } );
 
     this.io.to( roomId ).emit( 'round-ended', payload );

@@ -125,6 +125,57 @@ export class Database {
     return result.rows[0];
   }
 
+  async saveBatchAnswers( batchAnswers = [] ) {
+    if ( !Array.isArray( batchAnswers ) || batchAnswers.length === 0 ) {
+      return { success: false, message: 'No answers to insert' };
+    }
+
+    try {
+      const combineInserts = batchAnswers.map( ans => {
+        const id = ans.id || crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(36).slice(2);
+
+        return {
+          sql: `
+            INSERT INTO ${TABLES.ANSWERS} (
+              id,
+              roomId,
+              playerId,
+              answerId,
+              isCorrect,
+              responseTime,
+              answerStreak,
+              scoreEarned,
+              createdAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `,
+          args: [
+            id,
+            ans.roomId,
+            ans.playerId,
+            ans.answerId,
+            ans.isCorrect ? 1 : 0,
+            ans.responseTime,
+            ans.answerStreak ?? 0,
+            ans.scoreEarned ?? 0,
+            Math.floor( ans.createdAt / 1000 )
+          ]
+        };
+      });
+
+      const result = await this.db.batch( combineInserts );
+      
+      return {
+        success: true,
+        message: 'Answers created successfully',
+        data: result
+      };
+
+    } catch (error) {
+      console.error('Error creating answers:', error);
+      throw error;
+    }
+  }
+
   async getAllRooms() {
     const result = await this.db.execute({
       sql: `
@@ -136,6 +187,4 @@ export class Database {
   
     return result.rows;
   }
-
-  
 }

@@ -31,9 +31,11 @@ export default class HandleRound extends EventEmitter {
   }
 
   endRound( io, { roomId } ) {
-    const game = this.experience.games.get( roomId );
+    const experience = this.experience;
+    const game = experience.games.get( roomId );
+
     if ( !game ) {
-      this.experience.notifier.error( io, 'Room not found' );
+      experience.notifier.error( io, 'Room not found' );
       return;
     }
 
@@ -51,6 +53,14 @@ export default class HandleRound extends EventEmitter {
 
     // Flush answers
     const batch = game.answers.flushRound();
+    for ( const answer of batch ) {
+      const player = game.players.get( answer.playerToken );
+      game.players.upsert( answer.playerToken, {
+        totalScore: player.totalScore + answer.scoreEarned,
+        streak: answer.answerStreak
+      } );
+    }
+    experience.repositories.answers.saveBatch( batch );
     
     // End current round
     // this.experience.notifier.roundEnded( roomId, batch );
