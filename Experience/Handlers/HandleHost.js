@@ -22,7 +22,7 @@ export default class HandleHost {
     game.questions = questions;
     
     // Socket management
-    socket.join( roomId );
+    await socket.join( roomId );
     socket.isHost = true;
     socket.roomId = roomId;
 

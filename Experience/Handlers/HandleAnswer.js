@@ -3,13 +3,13 @@ export default class HandleAnswer {
     this.experience = experience;
   }
 
-  addAnswer({ roomId, playerId, questionType, answer }) {
+  addAnswer({ roomId, playerToken, questionType, answer }) {
     const game = this.experience.games.get( roomId );
     const isPlaying = game?.status === 'playing';
     if ( !game || !isPlaying ) return;
 
     // Check if player has already answered
-    const existingAnswer = game.answers.getByPlayerId( playerId );
+    const existingAnswer = game.answers.getByplayerToken( playerToken );
     if ( existingAnswer ) return;
 
     // Check question and answer
@@ -17,18 +17,19 @@ export default class HandleAnswer {
     if ( !question || !answer ) return;
 
     let isCorrect = false;
-    if (questionType === 'single') {
+    if ( questionType === 'single' ) {
       isCorrect = question.correctAnswerIndex === answer.index;
-    } else if (questionType === 'sequence') {
+    } else if ( questionType === 'sequence' ) {
       const correctSequence = [...question.correctSequence].join(',');
       const currentAnswer = [...answer].join(',');
-
+      
       isCorrect = correctSequence === currentAnswer;
     }
     
     const answerData = { index: game.currentRound, isCorrect };
+    console.log( 'handle: ', answerData );
 
     // Add the answer
-    game.answers.add( playerId, answerData );
+    game.answers.add( playerToken, answerData );
   }
 }

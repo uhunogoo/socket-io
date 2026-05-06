@@ -15,6 +15,7 @@ export default class AnswerManager {
 
     // Calculate score
     let score = 0;
+    console.log(answerData.isCorrect);
     if ( answerData.isCorrect && roundData ) {
       const timeTaken = Math.max( 0, submittedAt - (roundData.roundStartedAt || 0) );
       const timeRatio = Math.min( timeTaken / this.game.timeToAnswer, 1 );
@@ -35,10 +36,11 @@ export default class AnswerManager {
   }
 
   add( playerToken, answerData ) {
-    if ( !answerData || !this.game ) return;
-    if ( !this.game.currentRound ) return;
+    console.log('add: ', playerToken, answerData, this.game);
+    if ( !answerData || !playerToken ) return;
 
     // Create answer
+    console.log('add: ',answerData);
     const answer = this.createAnswerRecord( playerToken, answerData );
 
     // Store the answer with calculated score
@@ -119,3 +121,4 @@ export default class AnswerManager {
     this.tempAnswers.clear();
   }
 }
+

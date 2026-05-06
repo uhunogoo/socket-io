@@ -51,19 +51,25 @@ export default class HandleRound extends EventEmitter {
     // Add missing answers
     game.answers.addMissingAnswers();
 
-    // Flush answers
+    // Flush answers and update player scores
     const batch = game.answers.flushRound();
     for ( const answer of batch ) {
       const player = game.players.get( answer.playerToken );
       game.players.upsert( answer.playerToken, {
-        totalScore: player.totalScore + answer.scoreEarned,
-        streak: answer.answerStreak
+        totalScore: ( player.totalScore || 0 ) + ( answer.scoreEarned || 0 ),
+        streak: answer.answerStreak || 0
       } );
     }
-    // experience.repositories.answers.saveBatch( batch );
+    const allPlayers = game.players.getAll();
+
+    // Save round data to database
+    experience.repositories.round.saveRound( batch, allPlayers );
     
     // End current round
-    // this.experience.notifier.roundEnded( roomId, batch );
+    this.experience.notifier.roundEnded( roomId, {
+      answers: batch,
+      players: allPlayers
+    } );
 
     // Check if game is over
     this.isGameOver( game );

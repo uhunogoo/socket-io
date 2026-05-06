@@ -21,6 +21,7 @@ export default class ClientNotifier {
   roundStarted( roomId, roundData ) {
     const payload = createResponse( 'round-started', {
       roundIndex: roundData.currentRound,
+      status: roundData.status,
       question: sanitizeQuestion( roundData.questions ),
       duration: roundData.roundDuration,
       startsAt: Date.now(),
@@ -30,7 +31,10 @@ export default class ClientNotifier {
     this.io.to( roomId ).emit( 'round-started', payload );
   }
 
-  roundEnded( roomId, answers ) {
+  roundEnded( roomId, roundData ) {
+    if ( !roundData ) return;
+    const { answers, players } = roundData;
+
     const payload = createResponse( 'round-ended', {
       results: answers.map( answer => ( {
         playerToken: answer.playerToken,
@@ -38,6 +42,11 @@ export default class ClientNotifier {
         scoreEarned: answer.scoreEarned,
         responseTime: answer.responseTime,
         answerStreak: answer.answerStreak
+      } )),
+      leaderboard: players.map( player => ( {
+        playerToken: player.playerToken,
+        score: player.score,
+        streak: player.streak
       } ))
     } );
 

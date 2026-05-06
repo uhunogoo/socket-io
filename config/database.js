@@ -6,7 +6,7 @@ const db = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-const TABLES = {
+export const TABLES = {
   ROOMS: 'room',
   ROOM_PLAYERS: 'room_player',
   ANSWERS: 'room_answer',

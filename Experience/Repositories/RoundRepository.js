@@ -1,3 +1,5 @@
+import { TABLES } from '../../config/database.js';
+
 export default class RoundRepository {
   constructor( db ) {
     this.db = db;
@@ -15,7 +17,7 @@ export default class RoundRepository {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       args: [
-        ans.id, ans.roomId, ans.playerId, ans.answerId,
+        ans.id, ans.roomId, ans.playerToken, ans.answerId,
         ans.isCorrect ? 1 : 0, ans.responseTime,
         ans.answerStreak ?? 0, ans.scoreEarned ?? 0,
         Math.floor( ans.createdAt / 1000 )
@@ -32,6 +34,6 @@ export default class RoundRepository {
       args: [ p.totalScore, p.streak, p.playerToken ]
     } ) ) );
   
-    return await this.db.batch( batch );
+    // return await this.db.batch( batch );
   }
 }

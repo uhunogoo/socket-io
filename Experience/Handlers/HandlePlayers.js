@@ -13,7 +13,7 @@ export default class HandlePlayers {
       return;
     }
 
-    socket.join(roomId);
+    await socket.join( roomId );
     socket.isHost = false;
     socket.roomId = roomId;
     socket.playerToken = playerToken;
