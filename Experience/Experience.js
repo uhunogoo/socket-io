@@ -41,8 +41,14 @@ export default class Experience {
     this.answerHandler = new HandleAnswer( this );
 
     // Events
+    this.sockets.on('create-room', ( delegatedData ) => {
+      const { socket, data } = delegatedData;
+      this.hostHandler.createRoom( socket, data );
+    });
+    
     this.sockets.on('host-connect', ( delegatedData ) => {
       const { socket, data } = delegatedData;
+      console.log('host-connected');
       this.hostHandler.hostConnect( socket, data );
     });
     
@@ -85,15 +91,13 @@ export default class Experience {
       return;
     }
     
-    const { rooms, players, answers } = await this.repositories.room.getAllInitialData();
-
+    const rooms = await this.repositories.room.getAll();
+    
     for ( const room of rooms ) {
-      const roomPlayers = players.filter( (player) => player.roomId === room.id );
-      const roomAnswers = answers.filter( (answer) => answer.roomId === room.id );
-      
-      const game = this.buildGame( room, roomPlayers, roomAnswers );
+      const { players, answers } = await this.repositories.room.getRoomSnapshot( room.id );
+      const game = this.buildGame( room, players, answers );
 
-      this.games.set( room.id, game );
+      this.games.set( room.pin, game );
     }
     
     // Initialize sockets after games are set

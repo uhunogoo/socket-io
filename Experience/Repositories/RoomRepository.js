@@ -3,10 +3,9 @@ export default class RoomRepository {
     this.db = db;
   }
 
-  async getOrCreate( roomId ) {
+  async add( roomData ) {
     try {
-      let room = await this.db.getRoomById( roomId );
-      if ( !room ) throw new Error( 'Room not found' );
+      const room = await this.db.room.add( roomData );
       return room;
     } catch ( error ) {
       console.error( 'Error getting room:', error );
@@ -14,22 +13,21 @@ export default class RoomRepository {
     }
   }
   
-  async getFullRoomData( roomId ) {
+  async getRoomSnapshot( roomId ) {
     try {
-      const { players, answers } = await this.db.getAllRoomData( roomId );
+      const { players, answers } = await this.db.getSnapshot( roomId );
       return { players, answers };
     } catch ( error ) {
-      console.error( 'Error getting full room data:', error );
+      console.error( 'Error getting room snapshot:', error );
       throw error;
     }
   }
-  
-  async getAllInitialData() {
+
+  async getAll() {
     try {
-      const { rooms, players, answers } = await this.db.getAllInitialData();
-      return { rooms, players, answers };
+      return await this.db.room.getAll();
     } catch ( error ) {
-      console.error( 'Error getting all initial data:', error );
+      console.error( 'Error getting all rooms:', error );
       throw error;
     }
   }

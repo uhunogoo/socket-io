@@ -8,7 +8,7 @@ export default class AnswerManager {
   }
 
   createAnswerRecord( playerToken, answerData, overrides = {} ) {
-    const submittedAt = Date.now();
+    const submittedAt = new Date();
     const roundData = this.game.getCurrentRound();
     const playerStreak = this.getPlayerStreak( playerToken );
     const nextStreak = answerData.isCorrect ? playerStreak + 1 : 0;

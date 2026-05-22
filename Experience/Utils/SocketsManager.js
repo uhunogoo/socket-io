@@ -20,6 +20,9 @@ export default class SocketManager extends EventEmitter {
 
   // Register all socket events
   registerEvents( socket ) {
+    socket.on( 'create-room', ( gameData ) => {
+      this.emit( 'create-room', { socket, data: gameData } );
+    } );
     socket.on( 'host-connect', ( gameData ) => {
       this.emit( 'host-connect', { socket, data: gameData } );
     } );

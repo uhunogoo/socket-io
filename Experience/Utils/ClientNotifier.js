@@ -6,12 +6,16 @@ export default class ClientNotifier {
   }
 
   // Player update notification
-  playerUpdate( roomId, players, isGameStarted = false ) {
+  playerUpdate( roomId, data ={} ) {
+    if ( !data || !roomId ) return false;
+
     const payload = createResponse( 'players-update', {
-      players: players.map( sanitizePlayer ),
-      totalPlayers: players.length,
-      connectedCount: players.filter(p => p.isConnected).length,
-      isGameStarted
+      room: data.room,
+      questions: data.questions.map( sanitizeQuestion ),
+      players: data.players.map( sanitizePlayer ),
+      totalPlayers: data.players.length,
+      connectedCount: data.players.filter(p => p.isConnected).length,
+      isGameStarted: data.isGameStarted,
     } );
 
     this.io.to( roomId ).emit( 'players-update', payload );
@@ -24,7 +28,7 @@ export default class ClientNotifier {
       status: roundData.status,
       question: sanitizeQuestion( roundData.questions ),
       duration: roundData.roundDuration,
-      startsAt: Date.now(),
+      startsAt: new Date(),
       playersCount: roundData.players?.length
     } );
     

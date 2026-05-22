@@ -15,6 +15,7 @@ export default class Game {
 
     // Game data
     this.room = null;
+    this.quiz = null;
     this.answers = new AnswerManager( this );
     this.players = new PlayersManager();
     this.questions = [];
@@ -40,7 +41,7 @@ export default class Game {
     const gameData = this.getGameData();
     const roundData = copyObject( {
       ...gameData,
-      roundStartedAt: Date.now()
+      roundStartedAt: new Date()
     } );
 
     // Add round data

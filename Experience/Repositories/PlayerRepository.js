@@ -3,11 +3,15 @@ export default class PlayerRepository {
     this.db = db;
   }
 
-  async getByToken( token ) {
-    return await this.db.getPlayerByToken( token );
+  async upsert( playerData ) {
+    return await this.db.players.upsert( playerData );
   }
-  
-  async update( token, data ) {
-    return await this.db.updatePlayer( token, data );
+
+  async getByToken( playerToken ) {
+    return await this.db.players.get( playerToken );
+  }
+
+  async getAll( roomToken ) {
+    return await this.db.players.getAll( roomToken );
   }
 }

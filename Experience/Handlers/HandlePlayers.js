@@ -3,52 +3,58 @@ export default class HandlePlayers {
     this.experience = experience;
   }
 
-  async playerConnect(socket, { roomId, playerToken }) {
+  async playerConnect(socket, { roomId, playerToken, ...playerData }) {
     const experience = this.experience;
     const { notifier, repositories } = experience;
-
-    const game = experience.games.get(roomId);
+    const game = experience.games.get( roomId );
+    console.log( game );
     if (!game) {
       notifier.error(socket, 'Game not found');
       return;
     }
 
-    await socket.join( roomId );
-    socket.isHost = false;
-    socket.roomId = roomId;
-    socket.playerToken = playerToken;
-
-    // Game manages its own players.
+    // Game manages its own players
     const playerService = game.players;
+    const playerRepository = repositories.player;
     const isGameStarted = game.status === 'playing';
     
     try {
-      const playerData = await repositories.player.getByToken( playerToken );
-      if (!playerData) {
-        return notifier.error(socket, 'Player not found');
-      }
-
       const playerUpdateData = {
+        id: crypto.randomUUID(),
+        roomId: roomId,
+        isHost: false,
+        joinedAt: new Date(),
         ...playerData,
-        isConnected: 1,
-        lastSeenAt: new Date(),
       };
 
-      await repositories.player.update( playerToken, playerUpdateData );
-      playerService.upsert(playerToken, playerUpdateData);
+      // Update player in repository and service
+      const updatedPlayer = await playerRepository.upsert( playerUpdateData );
+      playerService.upsert( playerToken, updatedPlayer );
+
+      // Add to socket
+      await socket.join( roomId );
+      socket.isHost = false;
+      socket.roomId = roomId;
+      socket.playerToken = playerToken;
+
 
       // Success path continues
       const players = game.players.getAll();
-      notifier.playerUpdate( roomId, players, isGameStarted );
-    } catch (error) {
-      console.error('Player connection failed:', error);
-      notifier.error(socket, 'Connection failed, please retry');
+      notifier.playerUpdate( roomId, {
+        room: game.room,
+        players: players ?? [],
+        questions: game.questions ?? [],
+        isGameStarted
+      } )
+    
+      if ( isGameStarted ) {
+        const currentRound = game.getCurrentRound();
+        socket.emit( 'round-started', currentRound );
+      }
+    } catch ( error ) {
+      console.error( 'Player connection failed:', error );
+      notifier.error( socket, 'Connection failed, please retry' );
       socket.disconnect();
-    }
-
-    if (isGameStarted) {
-      const currentRound = game.getCurrentRound();
-      socket.emit('round-started', currentRound);
     }
   }
 }

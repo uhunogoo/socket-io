@@ -2,23 +2,23 @@
 export function createResponse(eventType, data) {
   return {
     type: eventType,
-    timestamp: Date.now(),
+    timestamp: new Date(),
     data
   };
 }
 
 // Public player data (minimal, safe to broadcast)
 export function sanitizePlayer( player ) {
-  const { playerToken, nickname, avatar, isConnected, score = 0, streak } = player;
+  if ( !player ) return null;
 
   return {
-    token: playerToken,
-    name: nickname,
-    avatar,
-    isConnected: isConnected === 1,
-    score: score,
-    streak: streak
-  };
+    id: player.id,
+    name: player.name,
+    avatar: player.avatar ?? null,
+    isOnline: player.isOnline === true || player.isOnline === 'true',
+    score: Number( player.score ?? 0 ),
+    streak: Number( player.streak ?? 0 ),
+  }
 }
 
 // Question without answer (for clients)

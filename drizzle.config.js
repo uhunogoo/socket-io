@@ -1,0 +1,19 @@
+import 'dotenv/config';
+import { defineConfig } from "drizzle-kit";
+
+export default defineConfig({
+  schema: './config/db/schema.js',
+  out: './drizzle',
+  dialect: 'turso',
+  dbCredentials: {
+    url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  },
+  tablesFilter: [
+    'room',
+    'room_player',
+    'room_round',
+    'room_answer',
+    'room_result',
+  ],
+});
