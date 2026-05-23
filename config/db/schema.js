@@ -24,8 +24,10 @@ export const roomPlayers = sqliteTable( 'room_player', {
   playerToken: text( 'playerToken' ).notNull(),
   nickname: text( 'nickname', { length: 100 } ).notNull(),
   isHost: integer( 'isHost', { mode: 'boolean' } ).default( false ).notNull(),
-  isConnected: integer( 'isConnected', { mode: 'boolean' } ).default( true ).notNull(),
-  joinedAt: integer( 'joinedAt', { mode: 'timestamp' } ).notNull(),
+  score: integer('score').default(0).notNull(),
+  streak: integer('streak').default(0).notNull(),
+  correctAnswers: integer('correctAnswers').default(0).notNull(),
+  isConnected: integer( 'isConnected', { mode: 'boolean' } ).default( true ).notNull(), joinedAt: integer( 'joinedAt', { mode: 'timestamp' } ).notNull(),
   lastSeenAt: integer( 'lastSeenAt', { mode: 'timestamp' } ),
 },
 (table) => [

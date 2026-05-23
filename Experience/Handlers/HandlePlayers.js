@@ -7,13 +7,14 @@ export default class HandlePlayers {
     const experience = this.experience;
     const { notifier, repositories } = experience;
     const game = experience.games.get( roomPin );
-    console.log( game );
+
     if (!game) {
       notifier.error(socket, 'Game not found');
       return;
     }
 
     // Game manages its own players
+    const room = game.room;
     const playerService = game.players;
     const playerRepository = repositories.player;
     const isGameStarted = game.status === 'playing';
@@ -21,7 +22,7 @@ export default class HandlePlayers {
     try {
       const playerUpdateData = {
         id: crypto.randomUUID(),
-        roomPin: roomPin,
+        roomId: room.id,
         isHost: false,
         joinedAt: new Date(),
         ...playerData,

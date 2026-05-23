@@ -34,7 +34,7 @@ export default class HandleDisconnect {
       };
 
       // Update player
-      await repositories.player.update( playerToken, newPlayerData );
+      await repositories.player.upsert( playerToken, newPlayerData );
       playerService.upsert( playerToken, newPlayerData );
   
       // Broadcast updated player list

@@ -1,4 +1,5 @@
 import { SCHEMA } from '../database.js';
+import { and, eq } from "drizzle-orm";
 
 export default class RoundHandler {
   constructor( db ) {
@@ -6,7 +7,6 @@ export default class RoundHandler {
   }
 
   async add( roomCode, roundId, roundData ) {
-    const roomSchema = SCHEMA.room;
     const roundSchema = SCHEMA.roomRound;
     
     const timeNow = new Date();
@@ -16,7 +16,7 @@ export default class RoundHandler {
     };
 
     const result = await this.db
-      .insert( roomSchema )
+      .insert( roundSchema )
       .values( payload )
       .onConflictDoNothing({
         target: [ roundSchema.roomId, roundSchema.roundNumber ],
