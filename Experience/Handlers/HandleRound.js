@@ -6,8 +6,8 @@ export default class HandleRound extends EventEmitter {
     this.experience = experience;
   }
 
-  startRound( io, { roomId } ) {
-    const game = this.experience.games.get( roomId );
+  startRound( io, { roomPin } ) {
+    const game = this.experience.games.get( roomPin );
     if ( !game ) {
       this.experience.notifier.error( io, 'Room not found' );
       return;
@@ -23,16 +23,16 @@ export default class HandleRound extends EventEmitter {
     }
     
     game.timers.set( 'roundTimer', setTimeout(() => {
-      this.endRound( io, { roomId } );
+      this.endRound( io, { roomPin } );
     }, game.timeToAnswer ) );
   
     // Notify players
-    this.experience.notifier.roundStarted( roomId, roundData );
+    this.experience.notifier.roundStarted( roomPin, roundData );
   }
 
-  endRound( io, { roomId } ) {
+  endRound( io, { roomPin } ) {
     const experience = this.experience;
-    const game = experience.games.get( roomId );
+    const game = experience.games.get( roomPin );
 
     if ( !game ) {
       experience.notifier.error( io, 'Room not found' );
@@ -56,8 +56,8 @@ export default class HandleRound extends EventEmitter {
     for ( const answer of batch ) {
       const player = game.players.get( answer.playerToken );
       game.players.upsert( answer.playerToken, {
-        totalScore: ( player.totalScore || 0 ) + ( answer.scoreEarned || 0 ),
-        streak: answer.answerStreak || 0
+        score: Number(player.score ?? 0) + answer.scoreEarned,
+        streak: answer.answerStreak ?? 0
       } );
     }
     const allPlayers = game.players.getAll();
@@ -66,7 +66,7 @@ export default class HandleRound extends EventEmitter {
     experience.repositories.round.saveRound( batch, allPlayers );
     
     // End current round
-    this.experience.notifier.roundEnded( roomId, {
+    this.experience.notifier.roundEnded( roomPin, {
       answers: batch,
       players: allPlayers
     } );

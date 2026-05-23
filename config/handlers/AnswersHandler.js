@@ -22,13 +22,13 @@ export default class AnswersHandler {
     return true;
   }
 
-  async get( roomToken, roundId ) {
+  async get( roomPin, roundId ) {
     const answerSchema = SCHEMA.roomAnswers;
     const answers = this.db
       .select()
       .from( answerSchema )
       .where( and(
-        eq( answerSchema.roomID, roomToken ),
+        eq( answerSchema.roomID, roomPin ),
         eq( answerSchema.roundId, roundId ),
       ) )
       .returning();

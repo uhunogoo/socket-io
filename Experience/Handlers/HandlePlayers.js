@@ -3,10 +3,10 @@ export default class HandlePlayers {
     this.experience = experience;
   }
 
-  async playerConnect(socket, { roomId, playerToken, ...playerData }) {
+  async playerConnect(socket, { roomPin, playerToken, ...playerData }) {
     const experience = this.experience;
     const { notifier, repositories } = experience;
-    const game = experience.games.get( roomId );
+    const game = experience.games.get( roomPin );
     console.log( game );
     if (!game) {
       notifier.error(socket, 'Game not found');
@@ -21,7 +21,7 @@ export default class HandlePlayers {
     try {
       const playerUpdateData = {
         id: crypto.randomUUID(),
-        roomId: roomId,
+        roomPin: roomPin,
         isHost: false,
         joinedAt: new Date(),
         ...playerData,
@@ -32,20 +32,20 @@ export default class HandlePlayers {
       playerService.upsert( playerToken, updatedPlayer );
 
       // Add to socket
-      await socket.join( roomId );
+      await socket.join( roomPin );
       socket.isHost = false;
-      socket.roomId = roomId;
+      socket.roomPin = roomPin;
       socket.playerToken = playerToken;
 
 
       // Success path continues
       const players = game.players.getAll();
-      notifier.playerUpdate( roomId, {
+      notifier.playerUpdate( roomPin, {
         room: game.room,
-        players: players ?? [],
-        questions: game.questions ?? [],
-        isGameStarted
-      } )
+        players,
+        quiz: game.quiz,
+        isGameStarted: isGameStarted
+      } );
     
       if ( isGameStarted ) {
         const currentRound = game.getCurrentRound();

@@ -3,8 +3,8 @@ export default class HandleAnswer {
     this.experience = experience;
   }
 
-  addAnswer({ roomId, playerToken, questionType, answer }) {
-    const game = this.experience.games.get( roomId );
+  addAnswer({ roomPin, playerToken, questionType, answer }) {
+    const game = this.experience.games.get( roomPin );
     const isPlaying = game?.status === 'playing';
     if ( !game || !isPlaying ) return;
 

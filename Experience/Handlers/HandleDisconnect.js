@@ -7,13 +7,13 @@ export default class HandleDisconnect {
     const experience = this.experience;
     const { notifier, repositories } = experience;
 
-    const { playerToken, roomId } = socket;
-    if ( !playerToken || !roomId ) {
+    const { playerToken, roomPin } = socket;
+    if ( !playerToken || !roomPin ) {
       notifier.error( socket, 'Missing player token or room ID' );
       return;
     }
     
-    const game = experience.games.get( roomId );
+    const game = experience.games.get( roomPin );
     if ( !game ) {
       notifier.error( socket, 'Game not found' );
       return;
@@ -39,7 +39,12 @@ export default class HandleDisconnect {
   
       // Broadcast updated player list
       const players = game.players.getAll();
-      notifier.playerUpdate( roomId, players );
+      notifier.playerUpdate( roomPin, {
+        room: game.room,
+        players,
+        quiz: game.quiz,
+        isGameStarted: game.status === 'playing'
+      } );
     } catch ( error ) {
       console.error( 'Error updating player on disconnect:', error );
       notifier.error( socket, 'Failed to update player status' );

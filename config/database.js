@@ -36,13 +36,13 @@ export class Database {
     this.answers = new AnswersHandler( this.db );
   }
 
-  async getSnapshot( roomCode ) {
+  async getSnapshot( roomId ) {
     const roomSchema = SCHEMA.room;
     if ( !roomSchema ) return null;
     
     const [ room, players ] = await Promise.all( [
-      this.room.get( roomCode ),
-      this.players.getAll( roomCode ),
+      this.room.get( roomId ),
+      this.players.getAll( roomId ),
     ] );
 
     if ( !room ) return {};
@@ -51,8 +51,8 @@ export class Database {
     let answers = [];
 
     if ( room.currentRound ) {
-      round = await this.rounds.get( roomCode, room.currentRound );
-      answers = await this.answers.get( roomCode, room.currentRound );
+      round = await this.rounds.get( roomId, room.currentRound );
+      answers = await this.answers.get( roomId, room.currentRound );
     }
     
     return {

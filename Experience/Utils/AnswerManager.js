@@ -52,13 +52,13 @@ export default class AnswerManager {
 
     const batchData = [];
     const roundIndex = this.game.currentRound;
-    const roomId = this.game.room.id;
+    const roomPin = this.game.room.pin;
 
     // Convert Map to Array of Objects matching your Schema
     for ( const [ playerToken, data ] of this.tempAnswers.entries() ) {
       const record = {
         id: crypto.randomUUID(),
-        roomId: roomId,
+        roomPin: roomPin,
         playerToken: playerToken,
         ...data,
       };

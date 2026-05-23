@@ -4,28 +4,28 @@ class HandleHost {
   }
 
   async hostConnect( socket, data ) {
-    const { roomId, playerToken } = data;
+    const { roomPin, playerToken } = data;
     const experience = this.experience;
     const {notifier, repositories} = experience;
 
     // Game managment
-    let game = experience.games.get( roomId );
-    console.log(roomId, playerToken);
+    let game = experience.games.get( roomPin );
+    console.log(roomPin, playerToken);
     if (!game) return;
 
     // Socket management
-    await socket.join( roomId );
+    await socket.join( roomPin );
     socket.isHost = true;
-    socket.roomId = roomId;
+    socket.roomPin = roomPin;
 
     const players = game.players.getAll();
     const isGameStarted = game.status === 'playing';
-    console.log('ok')
-    notifier.playerUpdate( roomId, {
+
+    notifier.playerUpdate( roomPin, {
       room: game.room,
-      players: players ?? [],
-      questions: game.questions ?? [],
-      isGameStarted
+      players,
+      quiz: game.quiz,
+      isGameStarted: isGameStarted
     } );
 
     if ( isGameStarted ) {
@@ -65,7 +65,7 @@ class HandleHost {
     game.questions = quiz.questions;
 
     // Socket management
-    socket.roomId = roomData.pin;
+    socket.roomPin = roomData.pin;
   }
 }
 

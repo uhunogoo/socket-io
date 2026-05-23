@@ -90,11 +90,12 @@ export default class Experience {
       console.log('Games already initialized', existingGames);
       return;
     }
-    
-    const rooms = await this.repositories.room.getAll();
+
+    const roomRepository = this.repositories.room;
+    const rooms = await roomRepository.getAll();
     
     for ( const room of rooms ) {
-      const { players, answers } = await this.repositories.room.getRoomSnapshot( room.id );
+      const { players, answers } = await roomRepository.getRoomSnapshot( room.id );
       const game = this.buildGame( room, players, answers );
 
       this.games.set( room.pin, game );

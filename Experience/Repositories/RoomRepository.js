@@ -13,9 +13,9 @@ export default class RoomRepository {
     }
   }
   
-  async getRoomSnapshot( roomId ) {
+  async getRoomSnapshot( roomPin ) {
     try {
-      const { players, answers } = await this.db.getSnapshot( roomId );
+      const { players, answers } = await this.db.getSnapshot( roomPin );
       return { players, answers };
     } catch ( error ) {
       console.error( 'Error getting room snapshot:', error );

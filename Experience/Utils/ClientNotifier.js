@@ -6,23 +6,23 @@ export default class ClientNotifier {
   }
 
   // Player update notification
-  playerUpdate( roomId, data ={} ) {
-    if ( !data || !roomId ) return false;
+  playerUpdate( roomPin, data ={} ) {
+    if ( !data || !roomPin ) return false;
 
     const payload = createResponse( 'players-update', {
       room: data.room,
-      questions: data.questions.map( sanitizeQuestion ),
+      quiz: data.quiz,
       players: data.players.map( sanitizePlayer ),
       totalPlayers: data.players.length,
       connectedCount: data.players.filter(p => p.isConnected).length,
       isGameStarted: data.isGameStarted,
     } );
 
-    this.io.to( roomId ).emit( 'players-update', payload );
+    this.io.to( roomPin ).emit( 'players-update', payload );
   }
 
   // Round notifications
-  roundStarted( roomId, roundData ) {
+  roundStarted( roomPin, roundData ) {
     const payload = createResponse( 'round-started', {
       roundIndex: roundData.currentRound,
       status: roundData.status,
@@ -32,10 +32,10 @@ export default class ClientNotifier {
       playersCount: roundData.players?.length
     } );
     
-    this.io.to( roomId ).emit( 'round-started', payload );
+    this.io.to( roomPin ).emit( 'round-started', payload );
   }
 
-  roundEnded( roomId, roundData ) {
+  roundEnded( roomPin, roundData ) {
     if ( !roundData ) return;
     const { answers, players } = roundData;
 
@@ -54,7 +54,7 @@ export default class ClientNotifier {
       } ))
     } );
 
-    this.io.to( roomId ).emit( 'round-ended', payload );
+    this.io.to( roomPin ).emit( 'round-ended', payload );
   }
 
   // Personal events

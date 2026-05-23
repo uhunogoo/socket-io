@@ -11,7 +11,7 @@ export default class PlayerRepository {
     return await this.db.players.get( playerToken );
   }
 
-  async getAll( roomToken ) {
-    return await this.db.players.getAll( roomToken );
+  async getAll( roomId ) {
+    return await this.db.players.getAll( roomId );
   }
 }

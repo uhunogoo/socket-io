@@ -56,12 +56,12 @@ export default class PlayerHandler {
     return player[0];
   }
 
-  async getAll( roomToken ) {
+  async getAll( roomId ) {
     const playerSchema = SCHEMA.roomPlayer;
     const players = await this.db
       .select()
       .from( playerSchema )
-      .where( eq( playerSchema.roomId, roomToken ) );
+      .where( eq( playerSchema.roomId, roomId ) );
     
     return players;
   }
