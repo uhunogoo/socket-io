@@ -14,11 +14,10 @@ export default class Game {
     this.maxScore = 1000;
 
     // Game data
-    this.room = null;
-    this.quiz = null;
+    this.room = {};
+    this.quiz = {};
     this.answers = new AnswerManager( this );
     this.players = new PlayersManager();
-    this.questions = [];
     this.rounds = new Map();
   }
 
@@ -26,8 +25,8 @@ export default class Game {
     return {
       status: this.status,
       currentRound: this.currentRound,
-      questions: this.questions[ this.currentRound ] || [],
-      questionsCount: this.questions.length,
+      quiz: this.quiz[ this.currentRound ] || [],
+      questionsCount: this.quiz.questions.length ?? 0,
       players: this.players.getAll(),
       answers: this.answers.getCurrentRoundAnswers(),
       roundDuration: this.timeToAnswer,

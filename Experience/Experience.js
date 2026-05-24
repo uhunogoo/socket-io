@@ -107,12 +107,13 @@ export default class Experience {
     return this;
   }
   
-  buildGame( room, roomPlayers, roomAnswers ) {
+  buildGame({ room, roomPlayers, quiz, roomAnswers }) {
     const game = new Games();
     // Set room data
     game.room = room;
-    // game.timeToAnswer = room.timeToAnswer * 1000;
+    game.quiz = quiz;
     game.timeToAnswer = 8 * 1000;
+    // game.timeToAnswer = room.timeToAnswer * 1000;
 
     // Add players to game
     roomPlayers.forEach(

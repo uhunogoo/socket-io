@@ -22,6 +22,7 @@ export default class HandlePlayers {
     try {
       const playerUpdateData = {
         id: crypto.randomUUID(),
+        playerToken: playerToken,
         roomId: room.id,
         isHost: false,
         joinedAt: new Date(),

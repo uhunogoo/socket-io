@@ -28,7 +28,6 @@ export default class HandleDisconnect {
     
     try {
       const newPlayerData = {
-        ...player,
         isConnected: 0,
         lastSeenAt: new Date()
       };

@@ -10,7 +10,6 @@ class HandleHost {
 
     // Game managment
     let game = experience.games.get( roomPin );
-    console.log(roomPin, playerToken);
     if (!game) return;
 
     // Socket management
@@ -36,13 +35,15 @@ class HandleHost {
 
   async createRoom( socket, data ) {
     const { roomData, playerData, quiz } = data;
+    if ( !roomData || !playerData || !quiz ) return;
+
+    // Params
     const experience = this.experience;
     const { notifier, repositories } = experience;
 
     // Game managment
     let game = experience.games.get( roomData.pin );
     if ( !game ) {
-      // Game not found, create a new one
       const roomToInsert = {
         ...roomData,
         createdAt: new Date(),
@@ -54,15 +55,18 @@ class HandleHost {
       }
 
       const createdRoom = await repositories.room.add( roomToInsert );
-      const players = await repositories.player.upsert( playerData );
+      const players = await repositories.player.upsert( playerToInsert );
 
-      game = experience.buildGame( createdRoom, players, [] );
+      game = experience.buildGame({
+        room: createdRoom,
+        quiz: quiz,
+        roomPlayers: players,
+      });
       experience.games.set( createdRoom.pin, game );
     }
 
     // Add questions to game
     game.quiz = quiz;
-    game.questions = quiz.questions;
 
     // Socket management
     socket.roomPin = roomData.pin;
