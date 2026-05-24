@@ -33,7 +33,11 @@ export default class HandleDisconnect {
       };
 
       // Update player
-      await repositories.player.upsert( newPlayerData );
+      await repositories.player.upsert( {
+        playerToken,
+        roomId: game.room.id,
+        ...newPlayerData
+      } );
       playerService.upsert( playerToken, newPlayerData );
   
       // Broadcast updated player list

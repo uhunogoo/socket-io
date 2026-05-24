@@ -24,14 +24,15 @@ export default class AnswersHandler {
 
   async get( roomPin, roundId ) {
     const answerSchema = SCHEMA.roomAnswers;
-    const answers = this.db
+    const answers = await this.db
       .select()
       .from( answerSchema )
       .where( and(
-        eq( answerSchema.roomID, roomPin ),
+        eq( answerSchema.roomId, roomPin ),
         eq( answerSchema.roundId, roundId ),
       ) )
       .returning();
 
+    return answers;
   }
 }

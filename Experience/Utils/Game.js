@@ -26,7 +26,7 @@ export default class Game {
       status: this.status,
       currentRound: this.currentRound,
       quiz: this.quiz[ this.currentRound ] || [],
-      questionsCount: this.quiz.questions.length ?? 0,
+      questionsCount: this.quiz[ this.currentRound ]?.questions?.length ?? 0,
       players: this.players.getAll(),
       answers: this.answers.getCurrentRoundAnswers(),
       roundDuration: this.timeToAnswer,

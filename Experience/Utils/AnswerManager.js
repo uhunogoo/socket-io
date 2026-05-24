@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export default class AnswerManager {
   #SCORE_THRESHOLD = 0.1;
 
@@ -35,16 +37,16 @@ export default class AnswerManager {
     };
   }
 
-  add( playerToken, answerData ) {
-    console.log('add: ', playerToken, answerData, this.game);
-    if ( !answerData || !playerToken ) return;
+  add( playerId, answerData ) {
+    console.log('add: ', playerId, answerData, this.game);
+    if ( !answerData || !playerId ) return;
 
     // Create answer
     console.log('add: ',answerData);
-    const answer = this.createAnswerRecord( playerToken, answerData );
+    const answer = this.createAnswerRecord( playerId, answerData );
 
     // Store the answer with calculated score
-    this.tempAnswers.set( playerToken, answer );
+    this.tempAnswers.set( playerId, answer );
   }
 
   flushRound() {
@@ -52,14 +54,14 @@ export default class AnswerManager {
 
     const batchData = [];
     const roundIndex = this.game.currentRound;
-    const roomPin = this.game.room.pin;
+    const roomId = this.game.room.id;
 
     // Convert Map to Array of Objects matching your Schema
-    for ( const [ playerToken, data ] of this.tempAnswers.entries() ) {
+    for ( const [ playerId, data ] of this.tempAnswers.entries() ) {
       const record = {
         id: crypto.randomUUID(),
-        roomPin: roomPin,
-        playerToken: playerToken,
+        roomId: roomId,
+        playerId: playerId,
         ...data,
       };
 
@@ -93,14 +95,14 @@ export default class AnswerManager {
     }
   }
 
-  getPlayerStreak( playerToken ) {
+  getPlayerStreak( playerId ) {
     // Get last round's answer from history
     const previousRoundIndex = this.game.currentRound - 1;
     const previousAnswers = this.answersHistory.get( previousRoundIndex );
     
     if ( !previousAnswers ) return 0;
     
-    const playerAnswer = previousAnswers.find( a => a.playerToken === playerToken );
+    const playerAnswer = previousAnswers.find( a => a.playerToken === playerId );
     return playerAnswer?.answerStreak ?? 0;
   }
 
@@ -108,8 +110,8 @@ export default class AnswerManager {
     return this.answersHistory.get( roundIndex ) || [];
   }
 
-  getByplayerToken( playerToken ) {
-    return this.tempAnswers.get( playerToken ) || null;
+  getByPlayerId( playerId ) {
+    return this.tempAnswers.get( playerId ) || null;
   }
 
   getCurrentRoundAnswers() {

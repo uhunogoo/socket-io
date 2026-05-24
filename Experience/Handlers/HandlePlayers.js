@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export default class HandlePlayers {
   constructor(experience) {
     this.experience = experience;

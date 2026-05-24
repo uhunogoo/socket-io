@@ -27,7 +27,8 @@ export const roomPlayers = sqliteTable( 'room_player', {
   score: integer('score').default(0).notNull(),
   streak: integer('streak').default(0).notNull(),
   correctAnswers: integer('correctAnswers').default(0).notNull(),
-  isOnline: integer( 'isOnline', { mode: 'boolean' } ).default( true ).notNull(), joinedAt: integer( 'joinedAt', { mode: 'timestamp' } ).notNull(),
+  isOnline: integer( 'isOnline', { mode: 'boolean' } ).default( true ).notNull(),
+  joinedAt: integer( 'joinedAt', { mode: 'timestamp' } ).notNull(),
   lastSeenAt: integer( 'lastSeenAt', { mode: 'timestamp' } ),
 },
 (table) => [

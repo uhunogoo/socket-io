@@ -49,19 +49,15 @@ class HandleHost {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const playerToInsert = {
-        ...playerData,
-        joinedAt: new Date(),
-      }
 
       const createdRoom = await repositories.room.add( roomToInsert );
-      const players = await repositories.player.upsert( playerToInsert );
-
       game = experience.buildGame({
         room: createdRoom,
         quiz: quiz,
-        roomPlayers: players,
+        roomPlayers: [],
       });
+
+      // Add game to experience
       experience.games.set( createdRoom.pin, game );
     }
 

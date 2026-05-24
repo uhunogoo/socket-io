@@ -15,7 +15,7 @@ export function sanitizePlayer( player ) {
     id: player.id,
     name: player.name,
     avatar: player.avatar ?? null,
-    isOnline: player.isOnline === true || player.isOnline === 'true',
+    isOnline: player.isOnline === true,
     score: Number( player.score ?? 0 ),
     streak: Number( player.streak ?? 0 ),
   }

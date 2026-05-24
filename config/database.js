@@ -37,9 +37,6 @@ export class Database {
   }
 
   async getSnapshot( roomId ) {
-    const roomSchema = SCHEMA.room;
-    if ( !roomSchema ) return null;
-    
     const [ room, players ] = await Promise.all( [
       this.room.get( roomId ),
       this.players.getAll( roomId ),

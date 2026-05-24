@@ -6,7 +6,7 @@ export default class RoundHandler {
     this.db = db;
   }
 
-  async add( roomCode, roundId, roundData ) {
+  async add( roundData ) {
     const roundSchema = SCHEMA.roomRound;
     
     const timeNow = new Date();
@@ -25,31 +25,7 @@ export default class RoundHandler {
     return result;
   }
 
-  async update( roomId, roundNumber, roundData ) {
-    const roundSchema = SCHEMA.roomRound;
-
-    const timeNow = new Date();
-
-    const result = await this.db
-      .update( roundSchema )
-      .set({
-        ...roundData,
-        updatedAt: timeNow,
-      })
-      .where(
-        and(
-          eq( roundSchema.roomId, roomId ),
-          eq( roundSchema.roundNumber, roundNumber ),
-        )
-      )
-      .returning();
-
-    if ( !result.length ) return null;
-
-    return result[0];
-  }
-
-   async get( roomId, roundNumber ) {
+  async get( roomId, roundNumber ) {
     const roundSchema = SCHEMA.roomRound;
 
     const result = await this.db
