@@ -28,12 +28,12 @@ export default class HandleDisconnect {
     
     try {
       const newPlayerData = {
-        isConnected: 0,
+        isOnline: 0,
         lastSeenAt: new Date()
       };
 
       // Update player
-      await repositories.player.upsert( playerToken, newPlayerData );
+      await repositories.player.upsert( newPlayerData );
       playerService.upsert( playerToken, newPlayerData );
   
       // Broadcast updated player list

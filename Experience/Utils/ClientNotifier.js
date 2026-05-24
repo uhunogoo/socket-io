@@ -14,7 +14,7 @@ export default class ClientNotifier {
       quiz: data.quiz,
       players: data.players.map( sanitizePlayer ),
       totalPlayers: data.players.length,
-      connectedCount: data.players.filter(p => p.isConnected).length,
+      connectedCount: data.players.filter(p => p.isOnline).length,
       isGameStarted: data.isGameStarted,
     } );
 

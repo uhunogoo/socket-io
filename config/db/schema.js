@@ -22,17 +22,17 @@ export const roomPlayers = sqliteTable( 'room_player', {
   id: text( 'id' ).primaryKey(),
   roomId: text( 'roomId' ).notNull().references( () => rooms.id, { onDelete: 'cascade' } ),
   playerToken: text( 'playerToken' ).notNull(),
-  nickname: text( 'nickname', { length: 100 } ).notNull(),
+  name: text( 'name', { length: 100 } ).notNull(),
   isHost: integer( 'isHost', { mode: 'boolean' } ).default( false ).notNull(),
   score: integer('score').default(0).notNull(),
   streak: integer('streak').default(0).notNull(),
   correctAnswers: integer('correctAnswers').default(0).notNull(),
-  isConnected: integer( 'isConnected', { mode: 'boolean' } ).default( true ).notNull(), joinedAt: integer( 'joinedAt', { mode: 'timestamp' } ).notNull(),
+  isOnline: integer( 'isOnline', { mode: 'boolean' } ).default( true ).notNull(), joinedAt: integer( 'joinedAt', { mode: 'timestamp' } ).notNull(),
   lastSeenAt: integer( 'lastSeenAt', { mode: 'timestamp' } ),
 },
 (table) => [
   uniqueIndex( 'room_player_token_unique' ).on( table.roomId, table.playerToken ),
-  uniqueIndex( 'room_player_nickname_unique' ).on( table.roomId, table.nickname ),
+  uniqueIndex( 'room_player_name_unique' ).on( table.roomId, table.name ),
   index( 'room_player_room_idx' ).on( table.roomId ),
 ] );
 
